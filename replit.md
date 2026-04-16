@@ -25,3 +25,35 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+
+## Quiz Generator (Python)
+
+A standalone Python tool that converts a JSON quiz file into a rich self-contained HTML quiz page.
+
+### Files
+- `quiz_generator.py` — the main script (no external dependencies, uses Python stdlib only)
+- `sample_quiz.html` — example output generated from the uploaded questions
+
+### Usage
+```bash
+python3 quiz_generator.py <input_file.txt|json> [output_file.html]
+```
+
+### Input Format
+JSON array of objects with fields:
+- `qHindi`, `qEnglish` — question text
+- `optionsHindi`, `optionsEnglish` — array of 4 option strings
+- `correct` — 0-based index of correct answer
+- `explanationHindi`, `explanationEnglish` — explanation text
+- `subject`, `topic` — for filtering and stats
+
+### Output Features
+- Quiz mode with timer (60s/question, customizable, or no timer)
+- Subject/topic filtering and random/sequential question order
+- Question navigator with color-coded status dots
+- Auto-reveal answers with explanations after each answer
+- Detailed results page with subject-wise breakdown
+- Review mode (filter by correct/wrong/skipped)
+- Stats page with full session history (stored in browser localStorage)
+- Hindi/English language toggle
+- 100% self-contained (single .html file, no internet needed)

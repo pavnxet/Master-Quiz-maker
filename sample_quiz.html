@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Random3 1776334647090</title>
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-light: #818cf8;
+    --primary-dark: #3730a3;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #d97706;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 58px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(79,70,229,0.25);
+  }
+  nav .logo {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.01em;
+  }
+  nav .nav-tabs {
+    display: flex;
+    gap: 4px;
+  }
+  nav .nav-tab {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.75);
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.87rem;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  nav .nav-tab:hover { background: rgba(255,255,255,0.15); color: #fff; }
+  nav .nav-tab.active { background: rgba(255,255,255,0.2); color: #fff; font-weight: 700; }
+  nav .lang-toggle {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: background 0.15s;
+  }
+  nav .lang-toggle:hover { background: rgba(255,255,255,0.25); }
+
+  /* ---- PAGES ---- */
+  .page { display: none; padding: 24px; max-width: 900px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* ---- CARDS ---- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  /* ---- HOME ---- */
+  .home-hero {
+    text-align: center;
+    padding: 40px 20px 32px;
+  }
+  .home-hero h1 { font-size: 2rem; color: var(--primary); margin-bottom: 10px; }
+  .home-hero p { color: var(--text-muted); font-size: 1rem; }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-card .value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+  }
+  .stat-card .label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .filter-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .filter-row label { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
+  select, input[type=number] {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+  }
+  select:focus, input:focus { border-color: var(--primary); }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { background: #15803d; }
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+  }
+  .btn-outline:hover { background: var(--primary); color: #fff; }
+  .btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+  /* ---- QUIZ ---- */
+  #quiz-progress-bar-wrap {
+    background: var(--border);
+    border-radius: 99px;
+    height: 6px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  #quiz-progress-bar { background: var(--primary); height: 100%; border-radius: 99px; transition: width 0.3s; width: 0%; }
+  .quiz-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  #quiz-timer {
+    background: var(--primary);
+    color: #fff;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  #quiz-timer.warning { background: var(--warning); }
+  #quiz-timer.danger { background: var(--danger); }
+  .question-text {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.6;
+    margin-bottom: 22px;
+  }
+  .question-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    background: #ede9fe;
+    color: var(--primary);
+    padding: 2px 10px;
+    border-radius: 99px;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .options-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .option-item {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .option-item:hover:not(.disabled) {
+    border-color: var(--primary-light);
+    background: #ede9fe22;
+  }
+  .option-item.selected { border-color: var(--primary); background: #ede9fe44; }
+  .option-item.correct { border-color: var(--success); background: #dcfce7; }
+  .option-item.wrong { border-color: var(--danger); background: #fee2e2; }
+  .option-item.disabled { cursor: default; }
+  .option-letter {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  .option-item.correct .option-letter { background: var(--success); border-color: var(--success); color: #fff; }
+  .option-item.wrong .option-letter { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .option-item.selected .option-letter { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .explanation-box {
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: #f1f5f9;
+    border-left: 4px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    display: none;
+  }
+  .explanation-box.show { display: block; }
+  .quiz-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 22px;
+    gap: 10px;
+  }
+  .question-nav-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 16px;
+  }
+  .q-dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s;
+  }
+  .q-dot:hover { border-color: var(--primary); color: var(--primary); }
+  .q-dot.current { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .q-dot.answered { border-color: var(--success); background: #dcfce7; color: var(--success); }
+  .q-dot.wrong-answered { border-color: var(--danger); background: #fee2e2; color: var(--danger); }
+  .q-dot.skipped { border-color: var(--warning); background: #fef9c3; color: var(--warning); }
+
+  /* ---- RESULTS ---- */
+  .result-hero { text-align: center; padding: 30px 0; }
+  .result-score-ring {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 10px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .result-score-ring .score-pct {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--primary);
+  }
+  .result-score-ring .score-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .result-bars { margin-top: 16px; }
+  .result-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 0.88rem;
+  }
+  .result-bar-label { width: 90px; color: var(--text-muted); }
+  .result-bar-track {
+    flex: 1;
+    background: var(--border);
+    border-radius: 99px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .result-bar-fill { height: 100%; border-radius: 99px; }
+  .result-bar-count { width: 40px; text-align: right; font-weight: 700; }
+
+  /* ---- REVIEW ---- */
+  .review-q {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .review-q .q-number {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .review-q .q-text {
+    font-weight: 600;
+    margin-bottom: 14px;
+    line-height: 1.55;
+  }
+  .review-option {
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    margin-bottom: 7px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+  }
+  .review-option.correct-opt { border-color: var(--success); background: #dcfce7; }
+  .review-option.user-wrong { border-color: var(--danger); background: #fee2e2; }
+  .review-explanation {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: #f1f5f9;
+    border-left: 4px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+  .badge-correct { background: #dcfce7; color: var(--success); }
+  .badge-wrong { background: #fee2e2; color: var(--danger); }
+  .badge-skipped { background: #fef9c3; color: var(--warning); }
+
+  /* ---- STATS ---- */
+  .history-list { margin-top: 12px; }
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+  }
+  .history-item .h-date { color: var(--text-muted); font-size: 0.8rem; flex: 1; }
+  .history-item .h-score { font-weight: 800; font-size: 1.1rem; color: var(--primary); }
+  .history-item .h-detail { color: var(--text-muted); font-size: 0.82rem; }
+  .subject-breakdown { margin-top: 8px; }
+  .sub-row {
+    display: grid;
+    grid-template-columns: 1fr 80px 80px;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+    align-items: center;
+  }
+  .sub-row:last-child { border-bottom: none; }
+  .sub-row .sub-name { font-weight: 600; }
+  .sub-row .sub-pct { text-align: center; font-weight: 700; color: var(--primary); }
+  .sub-row .sub-total { text-align: center; color: var(--text-muted); }
+
+  /* MISC */
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+  @media (max-width: 600px) {
+    nav { padding: 0 12px; }
+    nav .logo { font-size: 0.9rem; }
+    nav .nav-tab { padding: 5px 10px; font-size: 0.78rem; }
+    .page { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">&#127979; Quiz Master</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('home')">Home</button>
+    <button class="nav-tab" onclick="showPage('quiz-setup')">Quiz</button>
+    <button class="nav-tab" onclick="showPage('review-page')">Review</button>
+    <button class="nav-tab" onclick="showPage('stats-page')">Stats</button>
+  </div>
+  <button class="lang-toggle" onclick="toggleLang()" id="lang-btn">EN / हिं</button>
+</nav>
+
+<!-- ============ HOME PAGE ============ -->
+<div id="home" class="page active">
+  <div class="home-hero">
+    <h1 id="home-title">Random3 1776334647090</h1>
+    <p id="home-subtitle">Master your subjects with smart practice</p>
+  </div>
+  <div class="stats-grid" id="home-stats"></div>
+  <div class="card">
+    <div class="section-title">&#128200; Performance Overview</div>
+    <div id="home-overview"></div>
+  </div>
+  <div class="card">
+    <div class="section-title">&#128218; Recent Sessions</div>
+    <div id="home-recent"></div>
+  </div>
+</div>
+
+<!-- ============ QUIZ SETUP PAGE ============ -->
+<div id="quiz-setup" class="page">
+  <div class="card">
+    <div class="section-title">&#9881;&#65039; Quiz Settings</div>
+    <div class="filter-row">
+      <label>Subject</label>
+      <select id="filter-subject">
+        <option value="">All Subjects</option>
+      </select>
+    </div>
+    <div class="filter-row">
+      <label>Topic</label>
+      <select id="filter-topic">
+        <option value="">All Topics</option>
+      </select>
+    </div>
+    <div class="filter-row">
+      <label>Questions</label>
+      <input type="number" id="q-count" min="5" max="200" value="20" style="width:80px"/>
+      <span style="font-size:0.85rem;color:var(--text-muted)" id="q-available"></span>
+    </div>
+    <div class="filter-row">
+      <label>Mode</label>
+      <select id="quiz-mode">
+        <option value="timed">Timed (60s/question)</option>
+        <option value="custom">Custom Timer</option>
+        <option value="free">No Timer</option>
+      </select>
+      <input type="number" id="custom-time" min="10" max="300" value="60" style="width:80px;display:none"/>
+      <span style="font-size:0.82rem;color:var(--text-muted)" id="custom-time-label" style="display:none"></span>
+    </div>
+    <div class="filter-row">
+      <label>Order</label>
+      <select id="quiz-order">
+        <option value="random">Random</option>
+        <option value="sequential">Sequential</option>
+      </select>
+    </div>
+    <hr class="divider"/>
+    <button class="btn btn-primary" onclick="startQuiz()" id="start-btn">&#9654; Start Quiz</button>
+    <span id="setup-msg" style="margin-left:12px;font-size:0.85rem;color:var(--danger)"></span>
+  </div>
+</div>
+
+<!-- ============ QUIZ PAGE ============ -->
+<div id="quiz-page" class="page">
+  <div id="quiz-progress-bar-wrap"><div id="quiz-progress-bar"></div></div>
+  <div class="quiz-meta">
+    <span id="quiz-meta-left"></span>
+    <span id="quiz-timer">60</span>
+    <button class="btn btn-sm btn-outline" onclick="endQuizEarly()">Finish Early</button>
+  </div>
+  <div class="card" id="quiz-card">
+    <div class="question-tag" id="q-tag"></div>
+    <div class="question-text" id="q-text"></div>
+    <ul class="options-list" id="options-list"></ul>
+    <div class="explanation-box" id="explanation-box"></div>
+    <div class="quiz-nav">
+      <button class="btn btn-outline btn-sm" id="prev-btn" onclick="goQuestion(-1)">&#8592; Prev</button>
+      <button class="btn btn-sm" id="skip-btn" onclick="skipQuestion()" style="background:#fef9c3;color:#92400e;border:2px solid #fbbf24;">Skip</button>
+      <button class="btn btn-primary btn-sm" id="next-btn" onclick="goQuestion(1)">Next &#8594;</button>
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:8px;">Question Navigator</div>
+    <div class="question-nav-grid" id="q-nav-grid"></div>
+  </div>
+</div>
+
+<!-- ============ RESULTS PAGE ============ -->
+<div id="results-page" class="page">
+  <div class="card result-hero">
+    <div class="result-score-ring" id="score-ring">
+      <span class="score-pct" id="result-pct">0%</span>
+      <span class="score-label">Score</span>
+    </div>
+    <h2 id="result-heading">Quiz Complete!</h2>
+    <p id="result-summary" style="color:var(--text-muted);margin-top:6px;"></p>
+  </div>
+  <div class="card">
+    <div class="section-title">&#128202; Breakdown</div>
+    <div class="result-bars" id="result-bars"></div>
+  </div>
+  <div class="card">
+    <div class="section-title">&#128218; Subject Performance</div>
+    <div id="result-subject-breakdown"></div>
+  </div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+    <button class="btn btn-primary" onclick="showPage('review-page')">&#128270; Review Answers</button>
+    <button class="btn btn-outline" onclick="showPage('quiz-setup')">&#128257; New Quiz</button>
+    <button class="btn btn-outline" onclick="showPage('home')">&#127968; Home</button>
+  </div>
+</div>
+
+<!-- ============ REVIEW PAGE ============ -->
+<div id="review-page" class="page">
+  <div class="card">
+    <div class="section-title">&#128270; Review Questions</div>
+    <div class="filter-row">
+      <label>Subject</label>
+      <select id="review-subject" onchange="renderReview()">
+        <option value="">All Subjects</option>
+      </select>
+      <label>Filter</label>
+      <select id="review-filter" onchange="renderReview()">
+        <option value="all">All</option>
+        <option value="wrong">Wrong Only</option>
+        <option value="correct">Correct Only</option>
+        <option value="skipped">Skipped Only</option>
+      </select>
+    </div>
+  </div>
+  <div id="review-list"></div>
+</div>
+
+<!-- ============ STATS PAGE ============ -->
+<div id="stats-page" class="page">
+  <div class="stats-grid" id="stats-grid"></div>
+  <div class="card">
+    <div class="section-title">&#128202; Subject-wise Accuracy</div>
+    <div class="subject-breakdown" id="stats-subject"></div>
+  </div>
+  <div class="card">
+    <div class="section-title">&#128337; Session History</div>
+    <div class="history-list" id="stats-history"></div>
+    <button class="btn btn-sm btn-outline" style="margin-top:10px;border-color:var(--danger);color:var(--danger)" onclick="clearHistory()">&#128465; Clear History</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  DATA
+// ============================================================
+const ALL_QUESTIONS = [{"qHindi": "ध्वनि प्रदूषण को मापने की इकाई क्या है?", "qEnglish": "What is the unit of measurement for noise pollution?", "optionsHindi": ["हर्ट्ज", "डेसीबल", "वाट", "न्यूटन"], "optionsEnglish": ["Hertz", "Decibel", "Watt", "Newton"], "correct": 1, "explanationHindi": "ENVIRONMENT पृ.6: ध्वनि प्रदूषण डेसीबल (dB) में मापा जाता है।", "explanationEnglish": "ENVIRONMENT p.6: Noise pollution is measured in decibels (dB).", "subject": "पर्यावरण विज्ञान", "topic": "ध्वनि प्रदूषण"}, {"qHindi": "कौन-सा विटामिन सूर्य के प्रकाश की उपस्थिति में त्वचा में संश्लेषित होता है?", "qEnglish": "Which vitamin is synthesized in the skin in the presence of sunlight?", "optionsHindi": ["विटामिन A", "विटामिन C", "विटामिन D", "विटामिन E"], "optionsEnglish": ["Vitamin A", "Vitamin C", "Vitamin D", "Vitamin E"], "correct": 2, "explanationHindi": "Science BK Pathak पृ.22: विटामिन D सूर्य के प्रकाश से त्वचा में बनता है।", "explanationEnglish": "Science BK Pathak p.22: Vitamin D is synthesized in skin by sunlight.", "subject": "जीव विज्ञान", "topic": "विटामिन"}, {"qHindi": "विद्युत अपघटन की प्रक्रिया में ऋणात्मक इलेक्ट्रोड को क्या कहते हैं?", "qEnglish": "What is the negative electrode called in the process of electrolysis?", "optionsHindi": ["एनोड", "कैथोड", "आयन", "इलेक्ट्रोलाइट"], "optionsEnglish": ["Anode", "Cathode", "Ion", "Electrolyte"], "correct": 1, "explanationHindi": "PHYSICS पृ.162: ऋणात्मक इलेक्ट्रोड कैथोड कहलाता है।", "explanationEnglish": "PHYSICS p.162: The negative electrode is called the cathode.", "subject": "भौतिक विज्ञान", "topic": "विद्युत अपघटन"}, {"qHindi": "मानव शरीर में सबसे बड़ी ग्रंथि कौन-सी है?", "qEnglish": "Which is the largest gland in the human body?", "optionsHindi": ["अग्न्याशय", "यकृत", "थायरॉइड", "पिट्यूटरी"], "optionsEnglish": ["Pancreas", "Liver", "Thyroid", "Pituitary"], "correct": 1, "explanationHindi": "BIOLOGY: यकृत (Liver) शरीर की सबसे बड़ी ग्रंथि है।", "explanationEnglish": "BIOLOGY: The liver is the largest gland in the body.", "subject": "जीव विज्ञान", "topic": "मानव शरीर"}, {"qHindi": "निम्नलिखित में से कौन-सा रासायनिक परिवर्तन का उदाहरण है?", "qEnglish": "Which of the following is an example of a chemical change?", "optionsHindi": ["पानी का उबलना", "लोहे का चुम्बक बनना", "अगरबत्ती का जलना", "बर्फ का पिघलना"], "optionsEnglish": ["Boiling of water", "Magnetization of iron", "Burning of incense stick", "Melting of ice"], "correct": 2, "explanationHindi": "CHEMISTRY पृ.2: अगरबत्ती का जलना रासायनिक परिवर्तन है, नया पदार्थ बनता है।", "explanationEnglish": "CHEMISTRY p.2: Burning of incense stick is a chemical change, new substances form.", "subject": "रसायन विज्ञान", "topic": "रासायनिक परिवर्तन"}, {"qHindi": "भारत का पहला स्वदेशी रॉकेट कौन-सा था?", "qEnglish": "Which was India's first indigenous rocket?", "optionsHindi": ["SLV-3", "ASLV", "PSLV", "GSLV"], "optionsEnglish": ["SLV-3", "ASLV", "PSLV", "GSLV"], "correct": 0, "explanationHindi": "BOOSTER LDC पृ.65: SLV-3 भारत का पहला स्वदेशी प्रक्षेपण यान था।", "explanationEnglish": "BOOSTER LDC p.65: SLV-3 was India's first indigenous launch vehicle.", "subject": "अंतरिक्ष प्रौद्योगिकी", "topic": "प्रक्षेपण यान"}, {"qHindi": "जल का अधिकतम घनत्व किस तापमान पर होता है?", "qEnglish": "At what temperature does water have maximum density?", "optionsHindi": ["0°C", "4°C", "10°C", "100°C"], "optionsEnglish": ["0°C", "4°C", "10°C", "100°C"], "correct": 1, "explanationHindi": "PHYSICS: जल का अधिकतम घनत्व 4°C पर होता है।", "explanationEnglish": "PHYSICS: Water has maximum density at 4°C.", "subject": "भौतिक विज्ञान", "topic": "द्रव्य के गुण"}, {"qHindi": "वायुमंडल की किस परत में ओजोन परत स्थित है?", "qEnglish": "In which layer of the atmosphere is the ozone layer located?", "optionsHindi": ["क्षोभमंडल", "समताप मंडल", "मध्य मंडल", "आयन मंडल"], "optionsEnglish": ["Troposphere", "Stratosphere", "Mesosphere", "Ionosphere"], "correct": 1, "explanationHindi": "ENVIRONMENT पृ.12: ओजोन परत समताप मंडल में स्थित है।", "explanationEnglish": "ENVIRONMENT p.12: Ozone layer is located in the stratosphere.", "subject": "पर्यावरण विज्ञान", "topic": "वायुमंडल की परतें"}, {"qHindi": "निम्नलिखित में से कौन-सा जैव उर्वरक का उदाहरण है?", "qEnglish": "Which of the following is an example of a biofertilizer?", "optionsHindi": ["यूरिया", "डीएपी", "राइजोबियम", "पोटाश"], "optionsEnglish": ["Urea", "DAP", "Rhizobium", "Potash"], "correct": 2, "explanationHindi": "ENVIRONMENT पृ.11: राइजोबियम जीवाणु जैव उर्वरक है।", "explanationEnglish": "ENVIRONMENT p.11: Rhizobium bacteria is a biofertilizer.", "subject": "पर्यावरण विज्ञान", "topic": "जैव उर्वरक"}, {"qHindi": "लेंस की क्षमता का SI मात्रक क्या है?", "qEnglish": "What is the SI unit of power of a lens?", "optionsHindi": ["मीटर", "डाइऑप्टर", "ल्यूमेन", "कैंडेला"], "optionsEnglish": ["Metre", "Dioptre", "Lumen", "Candela"], "correct": 1, "explanationHindi": "PHYSICS पृ.21: लेंस की क्षमता का मात्रक डाइऑप्टर है।", "explanationEnglish": "PHYSICS p.21: Unit of power of lens is dioptre.", "subject": "भौतिक विज्ञान", "topic": "प्रकाश – लेंस"}, {"qHindi": "पेनिसिलिन की खोज किसने की थी?", "qEnglish": "Who discovered penicillin?", "optionsHindi": ["लुई पाश्चर", "रॉबर्ट कोच", "अलेक्जेंडर फ्लेमिंग", "एडवर्ड जेनर"], "optionsEnglish": ["Louis Pasteur", "Robert Koch", "Alexander Fleming", "Edward Jenner"], "correct": 2, "explanationHindi": "TECHNOLOGY पृ.3: अलेक्जेंडर फ्लेमिंग ने 1928 में पेनिसिलिन की खोज की।", "explanationEnglish": "TECHNOLOGY p.3: Alexander Fleming discovered penicillin in 1928.", "subject": "जैव प्रौद्योगिकी", "topic": "एंटीबायोटिक"}, {"qHindi": "कौन-सा तत्व सभी कार्बनिक यौगिकों में अनिवार्य रूप से पाया जाता है?", "qEnglish": "Which element is essentially present in all organic compounds?", "optionsHindi": ["हाइड्रोजन", "ऑक्सीजन", "नाइट्रोजन", "कार्बन"], "optionsEnglish": ["Hydrogen", "Oxygen", "Nitrogen", "Carbon"], "correct": 3, "explanationHindi": "CHEMISTRY पृ.45: कार्बन सभी कार्बनिक यौगिकों का मुख्य घटक है।", "explanationEnglish": "CHEMISTRY p.45: Carbon is the main constituent of all organic compounds.", "subject": "रसायन विज्ञान", "topic": "कार्बनिक रसायन"}, {"qHindi": "मानव नेत्र में रेटिना पर बनने वाला प्रतिबिंब कैसा होता है?", "qEnglish": "What is the nature of the image formed on the retina of the human eye?", "optionsHindi": ["वास्तविक और सीधा", "वास्तविक और उल्टा", "आभासी और सीधा", "आभासी और उल्टा"], "optionsEnglish": ["Real and erect", "Real and inverted", "Virtual and erect", "Virtual and inverted"], "correct": 1, "explanationHindi": "BOOSTER LDC पृ.40: रेटिना पर वास्तविक, उल्टा और छोटा प्रतिबिंब बनता है।", "explanationEnglish": "BOOSTER LDC p.40: Real, inverted and small image is formed on retina.", "subject": "भौतिक विज्ञान", "topic": "मानव नेत्र"}, {"qHindi": "निम्न में से कौन-सा प्रोटोजोआ जनित रोग है?", "qEnglish": "Which of the following is a protozoan disease?", "optionsHindi": ["क्षय रोग", "मलेरिया", "हैजा", "पोलियो"], "optionsEnglish": ["Tuberculosis", "Malaria", "Cholera", "Polio"], "correct": 1, "explanationHindi": "BOOSTER LDC पृ.160: मलेरिया प्लाज्मोडियम नामक प्रोटोजोआ से होता है।", "explanationEnglish": "BOOSTER LDC p.160: Malaria is caused by Plasmodium protozoan.", "subject": "जीव विज्ञान", "topic": "प्रोटोजोआ जनित रोग"}, {"qHindi": "गुरुत्वाकर्षण बल की खोज किसने की थी?", "qEnglish": "Who discovered the gravitational force?", "optionsHindi": ["गैलीलियो", "न्यूटन", "आइंस्टीन", "कॉपरनिकस"], "optionsEnglish": ["Galileo", "Newton", "Einstein", "Copernicus"], "correct": 1, "explanationHindi": "PHYSICS: न्यूटन ने गुरुत्वाकर्षण बल की खोज की।", "explanationEnglish": "PHYSICS: Newton discovered the gravitational force.", "subject": "भौतिक विज्ञान", "topic": "गुरुत्वाकर्षण"}, {"qHindi": "जैव प्रौद्योगिकी में 'PCR' का पूरा नाम क्या है?", "qEnglish": "What is the full form of 'PCR' in biotechnology?", "optionsHindi": ["Polymerase Chain Reaction", "Protein Chain Reaction", "Polymerase Copy Reaction", "Primary Cell Reaction"], "optionsEnglish": ["Polymerase Chain Reaction", "Protein Chain Reaction", "Polymerase Copy Reaction", "Primary Cell Reaction"], "correct": 0, "explanationHindi": "TECHNOLOGY पृ.3: PCR = Polymerase Chain Reaction.", "explanationEnglish": "TECHNOLOGY p.3: PCR = Polymerase Chain Reaction.", "subject": "जैव प्रौद्योगिकी", "topic": "PCR तकनीक"}, {"qHindi": "बेकिंग सोडा का रासायनिक नाम क्या है?", "qEnglish": "What is the chemical name of baking soda?", "optionsHindi": ["सोडियम कार्बोनेट", "सोडियम बाइकार्बोनेट", "सोडियम क्लोराइड", "कैल्शियम कार्बोनेट"], "optionsEnglish": ["Sodium carbonate", "Sodium bicarbonate", "Sodium chloride", "Calcium carbonate"], "correct": 1, "explanationHindi": "CHEMISTRY पृ.16: बेकिंग सोडा = सोडियम हाइड्रोजन कार्बोनेट (NaHCO₃)।", "explanationEnglish": "CHEMISTRY p.16: Baking soda = Sodium hydrogen carbonate (NaHCO₃).", "subject": "रसायन विज्ञान", "topic": "दैनिक जीवन में यौगिक"}, {"qHindi": "विश्व का पहला क्लोन भेड़ 'डॉली' किस वर्ष बनाया गया था?", "qEnglish": "In which year was the world's first cloned sheep 'Dolly' created?", "optionsHindi": ["1986", "1996", "2001", "2010"], "optionsEnglish": ["1986", "1996", "2001", "2010"], "correct": 1, "explanationHindi": "TECHNOLOGY पृ.7: डॉली भेड़ का क्लोन 1996 में बनाया गया था।", "explanationEnglish": "TECHNOLOGY p.7: Dolly the sheep was cloned in 1996.", "subject": "जैव प्रौद्योगिकी", "topic": "क्लोनिंग"}, {"qHindi": "वायुमंडलीय दाब मापने का यंत्र क्या कहलाता है?", "qEnglish": "What is the instrument used to measure atmospheric pressure called?", "optionsHindi": ["थर्मामीटर", "बैरोमीटर", "हाइड्रोमीटर", "एनीमोमीटर"], "optionsEnglish": ["Thermometer", "Barometer", "Hydrometer", "Anemometer"], "correct": 1, "explanationHindi": "PHYSICS: बैरोमीटर वायुमंडलीय दाब मापता है।", "explanationEnglish": "PHYSICS: Barometer measures atmospheric pressure.", "subject": "भौतिक विज्ञान", "topic": "दाब"}, {"qHindi": "निम्नलिखित में से कौन-सा अक्रिय गैस का उदाहरण है?", "qEnglish": "Which of the following is an example of an inert gas?", "optionsHindi": ["ऑक्सीजन", "नाइट्रोजन", "आर्गन", "हाइड्रोजन"], "optionsEnglish": ["Oxygen", "Nitrogen", "Argon", "Hydrogen"], "correct": 2, "explanationHindi": "CHEMISTRY पृ.31: आर्गन एक अक्रिय (नोबल) गैस है।", "explanationEnglish": "CHEMISTRY p.31: Argon is an inert (noble) gas.", "subject": "रसायन विज्ञान", "topic": "तत्वों का वर्गीकरण"}, {"qHindi": "टर्नर सिंड्रोम में गुणसूत्रों का संयोजन क्या होता है?", "qEnglish": "What is the chromosomal composition in Turner Syndrome?", "optionsHindi": ["44 + XXY", "44 + XO", "44 + XXX", "44 + XYY"], "optionsEnglish": ["44 + XXY", "44 + XO", "44 + XXX", "44 + XYY"], "correct": 1, "explanationHindi": "BOOSTER LDC पृ.162: टर्नर सिंड्रोम में 44+XO (एक X गुणसूत्र कम) होता है।", "explanationEnglish": "BOOSTER LDC p.162: Turner Syndrome has 44+XO (one missing X).", "subject": "जीव विज्ञान", "topic": "गुणसूत्रीय विकार"}, {"qHindi": "चंद्रयान-3 मिशन का मुख्य उद्देश्य क्या था?", "qEnglish": "What was the main objective of the Chandrayaan-3 mission?", "optionsHindi": ["चंद्रमा की परिक्रमा", "चंद्रमा पर सॉफ्ट लैंडिंग", "मंगल पर लैंडिंग", "सूर्य का अध्ययन"], "optionsEnglish": ["Orbiting the Moon", "Soft landing on the Moon", "Landing on Mars", "Studying the Sun"], "correct": 1, "explanationHindi": "BOOSTER LDC पृ.70: चंद्रयान-3 का उद्देश्य चंद्रमा के दक्षिणी ध्रुव पर सॉफ्ट लैंडिंग था।", "explanationEnglish": "BOOSTER LDC p.70: Chandrayaan-3 aimed for soft landing on Moon's south pole.", "subject": "अंतरिक्ष प्रौद्योगिकी", "topic": "चंद्रयान मिशन"}, {"qHindi": "विटामिन C की कमी से कौन-सा रोग होता है?", "qEnglish": "Which disease is caused by the deficiency of Vitamin C?", "optionsHindi": ["रतौंधी", "बेरी-बेरी", "स्कर्वी", "रिकेट्स"], "optionsEnglish": ["Night blindness", "Beri-beri", "Scurvy", "Rickets"], "correct": 2, "explanationHindi": "Science BK Pathak पृ.24: विटामिन C की कमी से स्कर्वी होता है।", "explanationEnglish": "Science BK Pathak p.24: Vitamin C deficiency causes scurvy.", "subject": "जीव विज्ञान", "topic": "विटामिन की कमी"}, {"qHindi": "विद्युत जनित्र किस सिद्धांत पर कार्य करता है?", "qEnglish": "On which principle does an electric generator work?", "optionsHindi": ["ओम का नियम", "विद्युत चुंबकीय प्रेरण", "फ्लेमिंग का वामहस्त नियम", "कूलॉम का नियम"], "optionsEnglish": ["Ohm's law", "Electromagnetic induction", "Fleming's left hand rule", "Coulomb's law"], "correct": 1, "explanationHindi": "PHYSICS पृ.37: विद्युत जनित्र विद्युत चुंबकीय प्रेरण के सिद्धांत पर कार्य करता है।", "explanationEnglish": "PHYSICS p.37: Electric generator works on electromagnetic induction.", "subject": "भौतिक विज्ञान", "topic": "विद्युत जनित्र"}, {"qHindi": "एसिटिक अम्ल का सामान्य नाम क्या है?", "qEnglish": "What is the common name of acetic acid?", "optionsHindi": ["फॉर्मिक अम्ल", "सिरका", "नींबू का रस", "दही का पानी"], "optionsEnglish": ["Formic acid", "Vinegar", "Lemon juice", "Whey"], "correct": 1, "explanationHindi": "CHEMISTRY पृ.46: एसिटिक अम्ल सिरके में पाया जाता है।", "explanationEnglish": "CHEMISTRY p.46: Acetic acid is found in vinegar.", "subject": "रसायन विज्ञान", "topic": "कार्बनिक यौगिक"}, {"qHindi": "पृथ्वी की सतह से ऊपर जाने पर सबसे पहले कौन-सी वायुमंडलीय परत आती है?", "qEnglish": "Which atmospheric layer is encountered first when going up from Earth's surface?", "optionsHindi": ["समताप मंडल", "मध्य मंडल", "क्षोभ मंडल", "आयन मंडल"], "optionsEnglish": ["Stratosphere", "Mesosphere", "Troposphere", "Ionosphere"], "correct": 2, "explanationHindi": "ENVIRONMENT पृ.2: क्षोभमंडल सबसे निचली परत है।", "explanationEnglish": "ENVIRONMENT p.2: Troposphere is the lowest layer.", "subject": "पर्यावरण विज्ञान", "topic": "वायुमंडल"}, {"qHindi": "निम्न में से कौन-सा जैविक यौगिक नहीं है?", "qEnglish": "Which of the following is not an organic compound?", "optionsHindi": ["मेथेन", "बेंजीन", "सोडियम क्लोराइड", "एथेनॉल"], "optionsEnglish": ["Methane", "Benzene", "Sodium chloride", "Ethanol"], "correct": 2, "explanationHindi": "CHEMISTRY पृ.45: सोडियम क्लोराइड एक अकार्बनिक लवण है।", "explanationEnglish": "CHEMISTRY p.45: Sodium chloride is an inorganic salt.", "subject": "रसायन विज्ञान", "topic": "कार्बनिक बनाम अकार्बनिक"}, {"qHindi": "बी.सी.जी. का टीका किस रोग के लिए लगाया जाता है?", "qEnglish": "BCG vaccine is administered for which disease?", "optionsHindi": ["पोलियो", "टिटेनस", "क्षय रोग", "हेपेटाइटिस"], "optionsEnglish": ["Polio", "Tetanus", "Tuberculosis", "Hepatitis"], "correct": 2, "explanationHindi": "BOOSTER LDC पृ.156: BCG टीका क्षय रोग (T.B.) से बचाव के लिए है।", "explanationEnglish": "BOOSTER LDC p.156: BCG vaccine is for protection against tuberculosis.", "subject": "जीव विज्ञान", "topic": "टीकाकरण"}, {"qHindi": "समतल दर्पण द्वारा बना प्रतिबिंब कैसा होता है?", "qEnglish": "What is the nature of the image formed by a plane mirror?", "optionsHindi": ["वास्तविक और उल्टा", "आभासी और सीधा", "वास्तविक और सीधा", "आभासी और उल्टा"], "optionsEnglish": ["Real and inverted", "Virtual and erect", "Real and erect", "Virtual and inverted"], "correct": 1, "explanationHindi": "PHYSICS पृ.4: समतल दर्पण में प्रतिबिंब आभासी, सीधा और समान आकार का होता है।", "explanationEnglish": "PHYSICS p.4: Plane mirror forms virtual, erect, and same-size image.", "subject": "भौतिक विज्ञान", "topic": "प्रकाश का परावर्तन"}, {"qHindi": "इंसुलिन की कमी से कौन-सा रोग होता है?", "qEnglish": "Which disease is caused by the deficiency of insulin?", "optionsHindi": ["गॉयटर", "मधुमेह", "बौनापन", "एडिसन रोग"], "optionsEnglish": ["Goiter", "Diabetes", "Dwarfism", "Addison's disease"], "correct": 1, "explanationHindi": "BOOSTER LDC पृ.163: इंसुलिन की कमी से मधुमेह (Diabetes) होता है।", "explanationEnglish": "BOOSTER LDC p.163: Insulin deficiency causes diabetes.", "subject": "जीव विज्ञान", "topic": "हार्मोन और रोग"}, {"qHindi": "भारत में पहला परमाणु रिएक्टर कौन-सा था?", "qEnglish": "Which was the first nuclear reactor in India?", "optionsHindi": ["ध्रुव", "साइरस", "अप्सरा", "कामिनी"], "optionsEnglish": ["Dhruva", "Cirus", "Apsara", "Kamini"], "correct": 2, "explanationHindi": "TECHNOLOGY: अप्सरा (1956) भारत का पहला परमाणु रिएक्टर था।", "explanationEnglish": "TECHNOLOGY: Apsara (1956) was India's first nuclear reactor.", "subject": "सामान्य विज्ञान", "topic": "परमाणु ऊर्जा"}, {"qHindi": "निम्नलिखित में से कौन-सी धातु जल के साथ अभिक्रिया नहीं करती है?", "qEnglish": "Which of the following metals does not react with water?", "optionsHindi": ["सोडियम", "पोटेशियम", "कैल्शियम", "सोना"], "optionsEnglish": ["Sodium", "Potassium", "Calcium", "Gold"], "correct": 3, "explanationHindi": "CHEMISTRY पृ.27: सोना एक निष्क्रिय धातु है और जल से अभिक्रिया नहीं करती।", "explanationEnglish": "CHEMISTRY p.27: Gold is an inert metal and does not react with water.", "subject": "रसायन विज्ञान", "topic": "धातुओं की अभिक्रियाशीलता"}, {"qHindi": "जैव विविधता के संरक्षण के लिए स्थापित क्षेत्र को क्या कहते हैं?", "qEnglish": "What is an area established for the conservation of biodiversity called?", "optionsHindi": ["चिड़ियाघर", "वनस्पति उद्यान", "बायोस्फीयर रिजर्व", "पशु फार्म"], "optionsEnglish": ["Zoo", "Botanical garden", "Biosphere reserve", "Animal farm"], "correct": 2, "explanationHindi": "ENVIRONMENT: बायोस्फीयर रिजर्व जैव विविधता संरक्षण के लिए होते हैं।", "explanationEnglish": "ENVIRONMENT: Biosphere reserves are for biodiversity conservation.", "subject": "पर्यावरण विज्ञान", "topic": "जैव विविधता संरक्षण"}, {"qHindi": "प्रतिरोध का SI मात्रक क्या है?", "qEnglish": "What is the SI unit of resistance?", "optionsHindi": ["वोल्ट", "एम्पीयर", "ओम", "वाट"], "optionsEnglish": ["Volt", "Ampere", "Ohm", "Watt"], "correct": 2, "explanationHindi": "PHYSICS पृ.29: प्रतिरोध का SI मात्रक ओम (Ω) है।", "explanationEnglish": "PHYSICS p.29: SI unit of resistance is ohm (Ω).", "subject": "भौतिक विज्ञान", "topic": "विद्युत धारा"}, {"qHindi": "पौधों में जल का परिवहन किस ऊतक द्वारा होता है?", "qEnglish": "Through which tissue is water transported in plants?", "optionsHindi": ["फ्लोएम", "जाइलम", "पैरेन्काइमा", "कॉलेन्काइमा"], "optionsEnglish": ["Phloem", "Xylem", "Parenchyma", "Collenchyma"], "correct": 1, "explanationHindi": "BIOLOGY: जाइलम ऊतक जल और खनिजों का परिवहन करता है।", "explanationEnglish": "BIOLOGY: Xylem tissue transports water and minerals.", "subject": "जीव विज्ञान", "topic": "पादप ऊतक"}, {"qHindi": "निम्न में से कौन-सा ऑक्सीकरण का उदाहरण है?", "qEnglish": "Which of the following is an example of oxidation?", "optionsHindi": ["लोहे पर जंग लगना", "बर्फ का पिघलना", "नमक का पानी में घुलना", "जल का वाष्प बनना"], "optionsEnglish": ["Rusting of iron", "Melting of ice", "Dissolving salt in water", "Vaporization of water"], "correct": 0, "explanationHindi": "CHEMISTRY पृ.7: लोहे पर जंग लगना ऑक्सीकरण अभिक्रिया है।", "explanationEnglish": "CHEMISTRY p.7: Rusting of iron is an oxidation reaction.", "subject": "रसायन विज्ञान", "topic": "ऑक्सीकरण-अपचयन"}, {"qHindi": "सूचना प्रौद्योगिकी में 'WWW' का पूरा नाम क्या है?", "qEnglish": "What is the full form of 'WWW' in information technology?", "optionsHindi": ["World Wide Web", "World Web Window", "Wide World Web", "Web Wide World"], "optionsEnglish": ["World Wide Web", "World Web Window", "Wide World Web", "Web Wide World"], "correct": 0, "explanationHindi": "TECHNOLOGY पृ.25: WWW = World Wide Web.", "explanationEnglish": "TECHNOLOGY p.25: WWW = World Wide Web.", "subject": "सूचना प्रौद्योगिकी", "topic": "इंटरनेट"}, {"qHindi": "मानव शरीर का सामान्य रक्तचाप कितना होता है?", "qEnglish": "What is the normal blood pressure of a human body?", "optionsHindi": ["120/80 mmHg", "140/90 mmHg", "100/60 mmHg", "160/100 mmHg"], "optionsEnglish": ["120/80 mmHg", "140/90 mmHg", "100/60 mmHg", "160/100 mmHg"], "correct": 0, "explanationHindi": "BOOSTER LDC पृ.46: सामान्य रक्तचाप 120/80 mmHg होता है।", "explanationEnglish": "BOOSTER LDC p.46: Normal blood pressure is 120/80 mmHg.", "subject": "जीव विज्ञान", "topic": "मानव शरीर क्रिया विज्ञान"}, {"qHindi": "विद्युत फ्यूज का तार किस पदार्थ का बना होता है?", "qEnglish": "Electric fuse wire is made of which material?", "optionsHindi": ["ताँबा", "टंगस्टन", "टिन और सीसा की मिश्रधातु", "एल्युमिनियम"], "optionsEnglish": ["Copper", "Tungsten", "Alloy of tin and lead", "Aluminium"], "correct": 2, "explanationHindi": "BOOSTER LDC पृ.52: फ्यूज तार टिन और सीसा की मिश्रधातु का बना होता है।", "explanationEnglish": "BOOSTER LDC p.52: Fuse wire is made of alloy of tin and lead.", "subject": "भौतिक विज्ञान", "topic": "विद्युत सुरक्षा"}, {"qHindi": "निम्न में से कौन-सा कवक जनित रोग है?", "qEnglish": "Which of the following is a fungal disease?", "optionsHindi": ["मलेरिया", "दाद", "टाइफाइड", "रेबीज"], "optionsEnglish": ["Malaria", "Ringworm", "Typhoid", "Rabies"], "correct": 1, "explanationHindi": "BOOSTER LDC पृ.160: दाद (Ringworm) कवक से होता है।", "explanationEnglish": "BOOSTER LDC p.160: Ringworm is caused by fungus.", "subject": "जीव विज्ञान", "topic": "कवक जनित रोग"}, {"qHindi": "कौन-सा तत्व 'रसायन विज्ञान का आधार' कहलाता है?", "qEnglish": "Which element is called the 'basis of chemistry'?", "optionsHindi": ["हाइड्रोजन", "ऑक्सीजन", "कार्बन", "नाइट्रोजन"], "optionsEnglish": ["Hydrogen", "Oxygen", "Carbon", "Nitrogen"], "correct": 2, "explanationHindi": "CHEMISTRY पृ.45: कार्बन सबसे अधिक यौगिक बनाता है।", "explanationEnglish": "CHEMISTRY p.45: Carbon forms the most compounds.", "subject": "रसायन विज्ञान", "topic": "कार्बन"}, {"qHindi": "माइक्रोस्कोप का आविष्कार किसने किया था?", "qEnglish": "Who invented the microscope?", "optionsHindi": ["गैलीलियो", "न्यूटन", "ल्यूवेनहॉक", "हुक"], "optionsEnglish": ["Galileo", "Newton", "Leeuwenhoek", "Hooke"], "correct": 2, "explanationHindi": "TECHNOLOGY पृ.3: एंटोनी वॉन ल्यूवेनहॉक ने जीवित कोशिका देखी और सूक्ष्मदर्शी का विकास किया।", "explanationEnglish": "TECHNOLOGY p.3: Leeuwenhoek observed living cells and developed the microscope.", "subject": "जैव प्रौद्योगिकी", "topic": "वैज्ञानिक उपकरण"}, {"qHindi": "नवीकरणीय ऊर्जा का स्रोत कौन-सा नहीं है?", "qEnglish": "Which of the following is not a renewable source of energy?", "optionsHindi": ["सौर ऊर्जा", "पवन ऊर्जा", "कोयला", "जल ऊर्जा"], "optionsEnglish": ["Solar energy", "Wind energy", "Coal", "Hydropower"], "correct": 2, "explanationHindi": "ENVIRONMENT: कोयला एक अनवीकरणीय जीवाश्म ईंधन है।", "explanationEnglish": "ENVIRONMENT: Coal is a non-renewable fossil fuel.", "subject": "पर्यावरण विज्ञान", "topic": "ऊर्जा के स्रोत"}, {"qHindi": "दो या दो से अधिक पदार्थों के समांगी मिश्रण को क्या कहते हैं?", "qEnglish": "What is a homogeneous mixture of two or more substances called?", "optionsHindi": ["यौगिक", "विलयन", "निलंबन", "कोलाइड"], "optionsEnglish": ["Compound", "Solution", "Suspension", "Colloid"], "correct": 1, "explanationHindi": "CHEMISTRY: समांगी मिश्रण को विलयन कहते हैं।", "explanationEnglish": "CHEMISTRY: A homogeneous mixture is called a solution.", "subject": "रसायन विज्ञान", "topic": "मिश्रण"}, {"qHindi": "फोटोसिंथेसिस की क्रिया में ऑक्सीजन कहाँ से निकलती है?", "qEnglish": "In photosynthesis, oxygen is evolved from:", "optionsHindi": ["कार्बन डाइऑक्साइड", "जल", "ग्लूकोज", "क्लोरोफिल"], "optionsEnglish": ["Carbon dioxide", "Water", "Glucose", "Chlorophyll"], "correct": 1, "explanationHindi": "BIOLOGY: प्रकाश संश्लेषण में ऑक्सीजन जल के प्रकाश अपघटन से निकलती है।", "explanationEnglish": "BIOLOGY: Oxygen is evolved from photolysis of water in photosynthesis.", "subject": "जीव विज्ञान", "topic": "प्रकाश संश्लेषण"}, {"qHindi": "भारत में पहला इस्पात कारखाना कहाँ स्थापित हुआ था?", "qEnglish": "Where was the first steel plant established in India?", "optionsHindi": ["जमशेदपुर", "भिलाई", "दुर्गापुर", "राउरकेला"], "optionsEnglish": ["Jamshedpur", "Bhilai", "Durgapur", "Rourkela"], "correct": 0, "explanationHindi": "TECHNOLOGY: टाटा स्टील जमशेदपुर में 1907 में स्थापित हुआ था।", "explanationEnglish": "TECHNOLOGY: Tata Steel was established in Jamshedpur in 1907.", "subject": "सामान्य विज्ञान", "topic": "उद्योग"}, {"qHindi": "ध्वनि की चाल सबसे अधिक किस माध्यम में होती है?", "qEnglish": "In which medium does sound travel fastest?", "optionsHindi": ["वायु", "जल", "निर्वात", "ठोस"], "optionsEnglish": ["Air", "Water", "Vacuum", "Solid"], "correct": 3, "explanationHindi": "PHYSICS: ध्वनि की चाल ठोस में सबसे अधिक होती है।", "explanationEnglish": "PHYSICS: Sound travels fastest in solids.", "subject": "भौतिक विज्ञान", "topic": "ध्वनि"}, {"qHindi": "पीयूष ग्रंथि (Pituitary Gland) कहाँ स्थित होती है?", "qEnglish": "Where is the pituitary gland located?", "optionsHindi": ["गर्दन में", "मस्तिष्क में", "उदर में", "वृक्क के ऊपर"], "optionsEnglish": ["Neck", "Brain", "Abdomen", "Above kidney"], "correct": 1, "explanationHindi": "BIOLOGY: पीयूष ग्रंथि मस्तिष्क के हाइपोथैलेमस के नीचे स्थित होती है।", "explanationEnglish": "BIOLOGY: Pituitary gland is located below the hypothalamus in the brain.", "subject": "जीव विज्ञान", "topic": "अंतःस्रावी तंत्र"}, {"qHindi": "निम्न में से कौन-सा उत्क्रमणीय परिवर्तन है?", "qEnglish": "Which of the following is a reversible change?", "optionsHindi": ["दूध से दही बनना", "कोयले का जलना", "बर्फ का पिघलना", "लोहे पर जंग लगना"], "optionsEnglish": ["Curdling of milk", "Burning of coal", "Melting of ice", "Rusting of iron"], "correct": 2, "explanationHindi": "CHEMISTRY पृ.2: बर्फ का पिघलना उत्क्रमणीय है क्योंकि जल से पुनः बर्फ बन सकती है।", "explanationEnglish": "CHEMISTRY p.2: Melting of ice is reversible as water can be frozen again.", "subject": "रसायन विज्ञान", "topic": "परिवर्तन के प्रकार"}, {"qHindi": "ग्रामीण क्षेत्रों में जल शुद्धिकरण के लिए सबसे सस्ती विधि कौन-सी है?", "qEnglish": "Which is the cheapest method for water purification in rural areas?", "optionsHindi": ["क्लोरीनीकरण", "उबालना", "सौर जल विसंक्रमण (SODIS)", "फिल्टरेशन"], "optionsEnglish": ["Chlorination", "Boiling", "Solar Water Disinfection (SODIS)", "Filtration"], "correct": 2, "explanationHindi": "ENVIRONMENT: SODIS (प्लास्टिक बोतल में धूप में रखना) सस्ती और प्रभावी विधि है।", "explanationEnglish": "ENVIRONMENT: SODIS (sunlight in plastic bottles) is a cheap and effective method.", "subject": "पर्यावरण विज्ञान", "topic": "जल शुद्धिकरण"}, {"qHindi": "ट्रांजिस्टर का आविष्कार किस वर्ष हुआ था?", "qEnglish": "In which year was the transistor invented?", "optionsHindi": ["1947", "1955", "1960", "1971"], "optionsEnglish": ["1947", "1955", "1960", "1971"], "correct": 0, "explanationHindi": "TECHNOLOGY: ट्रांजिस्टर का आविष्कार 1947 में बेल लैब्स में हुआ था।", "explanationEnglish": "TECHNOLOGY: Transistor was invented in 1947 at Bell Labs.", "subject": "सूचना प्रौद्योगिकी", "topic": "इलेक्ट्रॉनिक्स"}];
+
+// ============================================================
+//  STATE
+// ============================================================
+let lang = 'en';  // 'en' or 'hi'
+let currentSession = null; // {questions, answers, skipped, timer, mode}
+let history = [];           // array of session result objects
+
+// ============================================================
+//  PERSISTENCE
+// ============================================================
+function saveHistory() {
+  localStorage.setItem('quiz_history', JSON.stringify(history));
+}
+function loadHistory() {
+  try {
+    history = JSON.parse(localStorage.getItem('quiz_history') || '[]');
+  } catch(e) { history = []; }
+}
+function clearHistory() {
+  if (!confirm('Clear all history?')) return;
+  history = [];
+  saveHistory();
+  renderStatsPage();
+  renderHomePage();
+}
+
+// ============================================================
+//  LANGUAGE
+// ============================================================
+function toggleLang() {
+  lang = lang === 'en' ? 'hi' : 'en';
+  document.getElementById('lang-btn').textContent = lang === 'en' ? 'EN / हिं' : 'हिं / EN';
+  refreshCurrentPage();
+}
+function t(en, hi) { return lang === 'en' ? en : (hi || en); }
+function qText(q) { return lang === 'en' ? q.qEnglish : (q.qHindi || q.qEnglish); }
+function optList(q) { return lang === 'en' ? q.optionsEnglish : (q.optionsHindi || q.optionsEnglish); }
+function expText(q) { return lang === 'en' ? (q.explanationEnglish || '') : (q.explanationHindi || q.explanationEnglish || ''); }
+function subjectLabel(q) { return lang === 'en' ? (q.subject_en || q.subject || '') : (q.subject || ''); }
+function topicLabel(q) { return lang === 'en' ? (q.topic_en || q.topic || '') : (q.topic || ''); }
+
+// ============================================================
+//  PAGE NAVIGATION
+// ============================================================
+let currentPage = 'home';
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  const map = {'home':0,'quiz-setup':1,'quiz-page':1,'results-page':1,'review-page':2,'stats-page':3};
+  const tabs = document.querySelectorAll('.nav-tab');
+  if (map[id] !== undefined) tabs[map[id]].classList.add('active');
+  currentPage = id;
+  if (id === 'home') renderHomePage();
+  if (id === 'review-page') renderReview();
+  if (id === 'stats-page') renderStatsPage();
+}
+function refreshCurrentPage() {
+  if (currentPage === 'home') renderHomePage();
+  else if (currentPage === 'quiz-page') renderQuestion();
+  else if (currentPage === 'review-page') renderReview();
+  else if (currentPage === 'stats-page') renderStatsPage();
+  else if (currentPage === 'results-page') renderResults();
+}
+
+// ============================================================
+//  SUBJECTS / TOPICS
+// ============================================================
+function getSubjects() {
+  return [...new Set(ALL_QUESTIONS.map(q => q.subject).filter(Boolean))].sort();
+}
+function getTopics(subject) {
+  return [...new Set(
+    ALL_QUESTIONS
+      .filter(q => !subject || q.subject === subject)
+      .map(q => q.topic).filter(Boolean)
+  )].sort();
+}
+function populateFilters() {
+  const subSel = document.getElementById('filter-subject');
+  const subRev = document.getElementById('review-subject');
+  getSubjects().forEach(s => {
+    [subSel, subRev].forEach(el => {
+      const o = document.createElement('option');
+      o.value = s; o.textContent = s;
+      el.appendChild(o);
+    });
+  });
+  subSel.addEventListener('change', () => {
+    const topSel = document.getElementById('filter-topic');
+    topSel.innerHTML = '<option value="">All Topics</option>';
+    getTopics(subSel.value).forEach(t => {
+      const o = document.createElement('option');
+      o.value = t; o.textContent = t;
+      topSel.appendChild(o);
+    });
+    updateAvailable();
+  });
+  document.getElementById('q-count').addEventListener('input', updateAvailable);
+  updateAvailable();
+}
+function updateAvailable() {
+  const sub = document.getElementById('filter-subject').value;
+  const top = document.getElementById('filter-topic').value;
+  const pool = ALL_QUESTIONS.filter(q =>
+    (!sub || q.subject === sub) && (!top || q.topic === top)
+  );
+  document.getElementById('q-available').textContent = `(${pool.length} available)`;
+  document.getElementById('q-count').max = pool.length;
+}
+
+// ============================================================
+//  QUIZ SETUP
+// ============================================================
+document.getElementById('quiz-mode').addEventListener('change', function() {
+  const ct = document.getElementById('custom-time');
+  ct.style.display = this.value === 'custom' ? '' : 'none';
+});
+
+function startQuiz() {
+  const sub = document.getElementById('filter-subject').value;
+  const top = document.getElementById('filter-topic').value;
+  const count = parseInt(document.getElementById('q-count').value) || 20;
+  const mode = document.getElementById('quiz-mode').value;
+  const order = document.getElementById('quiz-order').value;
+  const customTime = parseInt(document.getElementById('custom-time').value) || 60;
+
+  let pool = ALL_QUESTIONS.filter(q =>
+    (!sub || q.subject === sub) && (!top || q.topic === top)
+  );
+  if (pool.length === 0) { showMsg('No questions match.'); return; }
+  if (count > pool.length) { showMsg(`Only ${pool.length} questions available.`); return; }
+
+  let questions = [...pool];
+  if (order === 'random') questions = questions.sort(() => Math.random() - 0.5);
+  questions = questions.slice(0, count);
+
+  const secPerQ = mode === 'timed' ? 60 : mode === 'custom' ? customTime : null;
+
+  currentSession = {
+    questions,
+    answers: new Array(questions.length).fill(null),  // null=unanswered, -1=skipped, 0-3=choice
+    currentIdx: 0,
+    startTime: Date.now(),
+    secPerQ,
+    timeLeft: secPerQ,
+    timerInterval: null,
+    subject: sub || 'All',
+    topic: top || 'All',
+    revealed: new Array(questions.length).fill(false),
+  };
+
+  buildQuizNav();
+  showPage('quiz-page');
+  renderQuestion();
+  if (secPerQ !== null) startTimer();
+}
+function showMsg(m) { document.getElementById('setup-msg').textContent = m; }
+
+// ============================================================
+//  QUIZ ENGINE
+// ============================================================
+function buildQuizNav() {
+  const grid = document.getElementById('q-nav-grid');
+  grid.innerHTML = '';
+  currentSession.questions.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'q-dot';
+    d.textContent = i + 1;
+    d.onclick = () => jumpTo(i);
+    grid.appendChild(d);
+  });
+}
+function updateNavDots() {
+  const dots = document.querySelectorAll('.q-dot');
+  const s = currentSession;
+  dots.forEach((d, i) => {
+    d.className = 'q-dot';
+    if (i === s.currentIdx) d.classList.add('current');
+    else if (s.answers[i] === -1) d.classList.add('skipped');
+    else if (s.answers[i] !== null) {
+      if (s.answers[i] === s.questions[i].correct) d.classList.add('answered');
+      else d.classList.add('wrong-answered');
+    }
+  });
+}
+function renderQuestion() {
+  const s = currentSession;
+  const q = s.questions[s.currentIdx];
+  const total = s.questions.length;
+  const answered = s.answers.filter(a => a !== null).length;
+
+  document.getElementById('quiz-progress-bar').style.width = ((s.currentIdx + 1) / total * 100) + '%';
+  document.getElementById('quiz-meta-left').textContent =
+    `Q ${s.currentIdx + 1} / ${total}  •  Answered: ${answered}`;
+
+  document.getElementById('q-tag').textContent =
+    `${subjectLabel(q) || ''}${topicLabel(q) ? ' › ' + topicLabel(q) : ''}`;
+  document.getElementById('q-text').textContent = qText(q);
+
+  const opts = optList(q);
+  const ul = document.getElementById('options-list');
+  ul.innerHTML = '';
+  const chosen = s.answers[s.currentIdx];
+  const revealed = s.revealed[s.currentIdx];
+
+  opts.forEach((opt, i) => {
+    const li = document.createElement('li');
+    li.className = 'option-item';
+    if (revealed) li.classList.add('disabled');
+
+    if (revealed) {
+      if (i === q.correct) li.classList.add('correct');
+      else if (i === chosen && chosen !== q.correct) li.classList.add('wrong');
+    } else if (i === chosen) {
+      li.classList.add('selected');
+    }
+
+    li.innerHTML = `<span class="option-letter">${String.fromCharCode(65+i)}</span><span>${opt}</span>`;
+    if (!revealed) li.onclick = () => selectOption(i);
+    ul.appendChild(li);
+  });
+
+  const expBox = document.getElementById('explanation-box');
+  if (revealed && expText(q)) {
+    expBox.textContent = expText(q);
+    expBox.classList.add('show');
+  } else {
+    expBox.classList.remove('show');
+  }
+
+  document.getElementById('prev-btn').disabled = s.currentIdx === 0;
+  const isLast = s.currentIdx === total - 1;
+  const nb = document.getElementById('next-btn');
+  nb.textContent = isLast ? 'Finish ✓' : 'Next →';
+  nb.onclick = isLast ? finishQuiz : () => goQuestion(1);
+
+  document.getElementById('skip-btn').style.display = revealed ? 'none' : '';
+
+  // reset timer display
+  if (s.secPerQ !== null) {
+    s.timeLeft = s.secPerQ;
+    updateTimerDisplay();
+  }
+
+  updateNavDots();
+}
+function selectOption(i) {
+  const s = currentSession;
+  if (s.revealed[s.currentIdx]) return;
+  s.answers[s.currentIdx] = i;
+  s.revealed[s.currentIdx] = true;
+  renderQuestion();
+  // auto-advance after short delay if not last
+  if (s.currentIdx < s.questions.length - 1) {
+    setTimeout(() => goQuestion(1), 1200);
+  }
+}
+function goQuestion(dir) {
+  const s = currentSession;
+  const next = s.currentIdx + dir;
+  if (next < 0 || next >= s.questions.length) return;
+  s.currentIdx = next;
+  if (s.secPerQ !== null) {
+    clearInterval(s.timerInterval);
+    s.timeLeft = s.secPerQ;
+    startTimer();
+  }
+  renderQuestion();
+}
+function jumpTo(i) {
+  const s = currentSession;
+  s.currentIdx = i;
+  if (s.secPerQ !== null) {
+    clearInterval(s.timerInterval);
+    s.timeLeft = s.secPerQ;
+    startTimer();
+  }
+  renderQuestion();
+}
+function skipQuestion() {
+  const s = currentSession;
+  if (s.answers[s.currentIdx] === null) s.answers[s.currentIdx] = -1;
+  goQuestion(1);
+}
+function endQuizEarly() {
+  if (!confirm('End quiz now and see results?')) return;
+  finishQuiz();
+}
+
+// ============================================================
+//  TIMER
+// ============================================================
+function startTimer() {
+  const s = currentSession;
+  if (s.secPerQ === null) return;
+  clearInterval(s.timerInterval);
+  s.timerInterval = setInterval(() => {
+    s.timeLeft--;
+    updateTimerDisplay();
+    if (s.timeLeft <= 0) {
+      clearInterval(s.timerInterval);
+      // time up — mark as skipped if not answered, reveal, auto-advance
+      if (s.answers[s.currentIdx] === null) s.answers[s.currentIdx] = -1;
+      s.revealed[s.currentIdx] = true;
+      renderQuestion();
+      if (s.currentIdx < s.questions.length - 1) {
+        setTimeout(() => {
+          goQuestion(1);
+          startTimer();
+        }, 1000);
+      } else {
+        setTimeout(finishQuiz, 1000);
+      }
+    }
+  }, 1000);
+}
+function updateTimerDisplay() {
+  const s = currentSession;
+  if (s.secPerQ === null) { document.getElementById('quiz-timer').style.display='none'; return; }
+  const el = document.getElementById('quiz-timer');
+  el.style.display = '';
+  const t = s.timeLeft;
+  el.textContent = `${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`;
+  el.className = t > s.secPerQ * 0.5 ? 'quiz-timer' : t > 10 ? 'warning' : 'danger';
+  el.id = 'quiz-timer';
+}
+
+// ============================================================
+//  FINISH
+// ============================================================
+function finishQuiz() {
+  const s = currentSession;
+  clearInterval(s.timerInterval);
+
+  let correct = 0, wrong = 0, skipped = 0;
+  const subjectStats = {};
+  s.questions.forEach((q, i) => {
+    const a = s.answers[i];
+    const sub = q.subject || 'Other';
+    if (!subjectStats[sub]) subjectStats[sub] = {correct:0,total:0};
+    subjectStats[sub].total++;
+    if (a === -1 || a === null) skipped++;
+    else if (a === q.correct) { correct++; subjectStats[sub].correct++; }
+    else wrong++;
+  });
+
+  const pct = Math.round(correct / s.questions.length * 100);
+  const elapsed = Math.round((Date.now() - s.startTime) / 1000);
+
+  const result = {
+    date: new Date().toISOString(),
+    total: s.questions.length,
+    correct, wrong, skipped, pct, elapsed,
+    subject: s.subject,
+    topic: s.topic,
+    subjectStats,
+    answers: [...s.answers],
+    questions: s.questions.map(q => ({
+      qEnglish: q.qEnglish, qHindi: q.qHindi,
+      optionsEnglish: q.optionsEnglish, optionsHindi: q.optionsHindi,
+      correct: q.correct,
+      explanationEnglish: q.explanationEnglish, explanationHindi: q.explanationHindi,
+      subject: q.subject, topic: q.topic
+    }))
+  };
+
+  history.unshift(result);
+  if (history.length > 50) history = history.slice(0, 50);
+  saveHistory();
+
+  currentSession._lastResult = result;
+
+  showPage('results-page');
+  renderResults();
+}
+function renderResults() {
+  if (!currentSession || !currentSession._lastResult) {
+    document.getElementById('results-page').innerHTML = '<div class="empty-state"><div class="icon">&#128203;</div><p>No quiz taken yet.</p></div>';
+    return;
+  }
+  const r = currentSession._lastResult;
+  document.getElementById('result-pct').textContent = r.pct + '%';
+  document.getElementById('result-heading').textContent =
+    r.pct >= 80 ? '&#127881; Excellent!' : r.pct >= 60 ? '&#128077; Good Job!' : '&#128170; Keep Practicing!';
+  document.getElementById('result-summary').textContent =
+    `${r.correct} correct, ${r.wrong} wrong, ${r.skipped} skipped — ${formatTime(r.elapsed)}`;
+
+  const ring = document.getElementById('score-ring');
+  const color = r.pct >= 80 ? '#16a34a' : r.pct >= 60 ? '#4f46e5' : '#dc2626';
+  ring.style.borderColor = color;
+  document.getElementById('result-pct').style.color = color;
+
+  // bars
+  const bars = document.getElementById('result-bars');
+  bars.innerHTML = `
+    ${barRow('Correct', r.correct, r.total, '#16a34a')}
+    ${barRow('Wrong', r.wrong, r.total, '#dc2626')}
+    ${barRow('Skipped', r.skipped, r.total, '#d97706')}
+  `;
+
+  // subject breakdown
+  const sb = document.getElementById('result-subject-breakdown');
+  sb.innerHTML = '<div class="sub-row" style="font-weight:700;color:var(--text-muted);font-size:0.8rem"><span>Subject</span><span style="text-align:center">Accuracy</span><span style="text-align:center">Questions</span></div>';
+  Object.entries(r.subjectStats).forEach(([sub, st]) => {
+    const p = Math.round(st.correct / st.total * 100);
+    sb.innerHTML += `<div class="sub-row"><span class="sub-name">${sub}</span><span class="sub-pct">${p}%</span><span class="sub-total">${st.total}</span></div>`;
+  });
+}
+function barRow(label, val, total, color) {
+  const pct = total ? Math.round(val/total*100) : 0;
+  return `<div class="result-bar-row">
+    <span class="result-bar-label">${label}</span>
+    <div class="result-bar-track"><div class="result-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+    <span class="result-bar-count">${val}</span>
+  </div>`;
+}
+
+// ============================================================
+//  REVIEW PAGE
+// ============================================================
+function renderReview() {
+  const filterSub = document.getElementById('review-subject').value;
+  const filterType = document.getElementById('review-filter').value;
+
+  // Use last session if available, else use all questions
+  let items = [];
+  if (currentSession && currentSession._lastResult) {
+    const r = currentSession._lastResult;
+    r.questions.forEach((q, i) => {
+      const a = r.answers[i];
+      let status = a === -1 || a === null ? 'skipped' : a === q.correct ? 'correct' : 'wrong';
+      items.push({q, a, status, idx: i});
+    });
+  } else {
+    ALL_QUESTIONS.forEach((q, i) => {
+      items.push({q, a: null, status: 'unanswered', idx: i});
+    });
+  }
+
+  if (filterSub) items = items.filter(it => it.q.subject === filterSub);
+  if (filterType === 'wrong') items = items.filter(it => it.status === 'wrong');
+  else if (filterType === 'correct') items = items.filter(it => it.status === 'correct');
+  else if (filterType === 'skipped') items = items.filter(it => it.status === 'skipped');
+
+  const list = document.getElementById('review-list');
+  if (items.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#128269;</div><p>No questions to show.</p></div>';
+    return;
+  }
+  list.innerHTML = items.map((it, n) => reviewCard(it, n + 1)).join('');
+}
+function reviewCard(it, n) {
+  const {q, a, status} = it;
+  const opts = optList(q);
+  const optRows = opts.map((opt, i) => {
+    let cls = '';
+    if (i === q.correct) cls = 'correct-opt';
+    else if (a !== null && a !== -1 && i === a && a !== q.correct) cls = 'user-wrong';
+    const icon = i === q.correct ? '&#10003;' : (a !== null && a !== -1 && i === a) ? '&#10007;' : '&#9675;';
+    return `<div class="review-option ${cls}">${icon} ${String.fromCharCode(65+i)}. ${opt}</div>`;
+  }).join('');
+
+  const badgeCls = status === 'correct' ? 'badge-correct' : status === 'wrong' ? 'badge-wrong' : 'badge-skipped';
+  const badgeText = status === 'correct' ? 'Correct' : status === 'wrong' ? 'Wrong' : 'Skipped';
+  const subTop = [subjectLabel(q), topicLabel(q)].filter(Boolean).join(' › ');
+
+  return `<div class="review-q">
+    <div class="q-number">Q${n} — ${subTop} <span class="badge ${badgeCls}">${badgeText}</span></div>
+    <div class="q-text">${qText(q)}</div>
+    ${optRows}
+    <div class="review-explanation">&#128161; ${expText(q) || 'No explanation available.'}</div>
+  </div>`;
+}
+
+// ============================================================
+//  STATS PAGE
+// ============================================================
+function renderStatsPage() {
+  if (history.length === 0) {
+    document.getElementById('stats-grid').innerHTML = '';
+    document.getElementById('stats-subject').innerHTML = '<div class="empty-state"><div class="icon">&#128202;</div><p>No sessions yet. Take a quiz first!</p></div>';
+    document.getElementById('stats-history').innerHTML = '';
+    return;
+  }
+  const totalQ = history.reduce((s, r) => s + r.total, 0);
+  const totalC = history.reduce((s, r) => s + r.correct, 0);
+  const avgPct = Math.round(history.reduce((s, r) => s + r.pct, 0) / history.length);
+  const best = Math.max(...history.map(r => r.pct));
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="value">${history.length}</div><div class="label">Sessions</div></div>
+    <div class="stat-card"><div class="value">${totalQ}</div><div class="label">Questions Attempted</div></div>
+    <div class="stat-card"><div class="value">${avgPct}%</div><div class="label">Average Score</div></div>
+    <div class="stat-card"><div class="value">${best}%</div><div class="label">Best Score</div></div>
+  `;
+
+  // subject accuracy across all sessions
+  const subAcc = {};
+  history.forEach(r => {
+    Object.entries(r.subjectStats || {}).forEach(([sub, st]) => {
+      if (!subAcc[sub]) subAcc[sub] = {correct:0,total:0};
+      subAcc[sub].correct += st.correct;
+      subAcc[sub].total += st.total;
+    });
+  });
+  const subEl = document.getElementById('stats-subject');
+  subEl.innerHTML = '<div class="sub-row" style="font-weight:700;color:var(--text-muted);font-size:0.8rem"><span>Subject</span><span style="text-align:center">Accuracy</span><span style="text-align:center">Attempted</span></div>';
+  Object.entries(subAcc).sort((a,b) => b[1].total - a[1].total).forEach(([sub, st]) => {
+    const p = Math.round(st.correct / st.total * 100);
+    subEl.innerHTML += `<div class="sub-row"><span class="sub-name">${sub}</span><span class="sub-pct">${p}%</span><span class="sub-total">${st.total}</span></div>`;
+  });
+
+  // history list
+  const histEl = document.getElementById('stats-history');
+  histEl.innerHTML = history.slice(0, 20).map(r => {
+    const d = new Date(r.date);
+    const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    return `<div class="history-item">
+      <span class="h-score">${r.pct}%</span>
+      <span class="h-detail">${r.correct}/${r.total} • ${r.subject}${r.topic !== 'All' ? ' › '+r.topic : ''}</span>
+      <span class="h-date">${dateStr}</span>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+//  HOME PAGE
+// ============================================================
+function renderHomePage() {
+  loadHistory();
+  const stats = document.getElementById('home-stats');
+  if (history.length === 0) {
+    stats.innerHTML = `<div class="stat-card"><div class="value">${ALL_QUESTIONS.length}</div><div class="label">Total Questions</div></div>
+      <div class="stat-card"><div class="value">${getSubjects().length}</div><div class="label">Subjects</div></div>
+      <div class="stat-card"><div class="value">0</div><div class="label">Quizzes Taken</div></div>
+      <div class="stat-card"><div class="value">—</div><div class="label">Best Score</div></div>`;
+  } else {
+    const best = Math.max(...history.map(r => r.pct));
+    const avg = Math.round(history.reduce((s, r) => s + r.pct, 0) / history.length);
+    stats.innerHTML = `<div class="stat-card"><div class="value">${ALL_QUESTIONS.length}</div><div class="label">Total Questions</div></div>
+      <div class="stat-card"><div class="value">${getSubjects().length}</div><div class="label">Subjects</div></div>
+      <div class="stat-card"><div class="value">${history.length}</div><div class="label">Quizzes Taken</div></div>
+      <div class="stat-card"><div class="value">${best}%</div><div class="label">Best Score</div></div>
+      <div class="stat-card"><div class="value">${avg}%</div><div class="label">Avg Score</div></div>`;
+  }
+
+  // overview
+  const ov = document.getElementById('home-overview');
+  if (history.length === 0) {
+    ov.innerHTML = '<div class="empty-state"><div class="icon">&#127919;</div><p>No quizzes taken yet. Click <strong>Quiz</strong> to get started!</p></div>';
+  } else {
+    const last = history[0];
+    const color = last.pct >= 80 ? '#16a34a' : last.pct >= 60 ? '#4f46e5' : '#dc2626';
+    ov.innerHTML = `<p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:10px">Last session: <strong style="color:${color}">${last.pct}%</strong> — ${last.correct}/${last.total} correct</p>
+      ${barRow('Correct', last.correct, last.total, '#16a34a')}
+      ${barRow('Wrong', last.wrong, last.total, '#dc2626')}
+      ${barRow('Skipped', last.skipped, last.total, '#d97706')}`;
+  }
+
+  // recent
+  const rec = document.getElementById('home-recent');
+  if (history.length === 0) {
+    rec.innerHTML = '<div style="color:var(--text-muted);font-size:0.9rem">No sessions yet.</div>';
+  } else {
+    rec.innerHTML = history.slice(0, 5).map(r => {
+      const d = new Date(r.date);
+      const dateStr = d.toLocaleDateString();
+      const color = r.pct >= 80 ? '#16a34a' : r.pct >= 60 ? '#4f46e5' : '#dc2626';
+      return `<div class="history-item">
+        <span class="h-score" style="color:${color}">${r.pct}%</span>
+        <span class="h-detail">${r.correct}/${r.total} • ${r.subject}</span>
+        <span class="h-date">${dateStr}</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ============================================================
+//  UTILS
+// ============================================================
+function formatTime(sec) {
+  if (!sec) return '—';
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+loadHistory();
+populateFilters();
+renderHomePage();
+</script>
+</body>
+</html>
