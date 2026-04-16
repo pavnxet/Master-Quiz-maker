@@ -1,3 +1,17 @@
 name = "quiz-generator"
 main = "worker.js"
 compatibility_date = "2024-12-01"
+
+# ── Telegram bot merge feature requires KV storage ──────────
+# Run once to create the namespace:
+#   npx wrangler kv:namespace create QUIZ_STORE
+# Then replace "your_kv_namespace_id_here" with the printed id:
+
+[[kv_namespaces]]
+binding = "QUIZ_STORE"
+id      = "your_kv_namespace_id_here"
+
+# ── Environment variables ───────────────────────────────────
+# Set TELEGRAM_TOKEN in Cloudflare dashboard:
+#   Workers → quiz-generator → Settings → Variables
+#   Key: TELEGRAM_TOKEN   Value: 123456:ABC-DEF...
