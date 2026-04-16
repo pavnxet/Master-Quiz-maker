@@ -1,0 +1,7 @@
+name = "quiz-generator"
+main = "worker.py"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["python_workers"]
+
+[build]
+command = ""
