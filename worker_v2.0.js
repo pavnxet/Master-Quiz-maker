@@ -146,6 +146,7 @@ async function getUserStats(env, chatId) {
 // ════════════════════════════════════════════════════════════
 function generateHtml(questions, title) {
   const titleSafe = escHtml(title);
+  const titleJs   = JSON.stringify(String(title || ''));
   const qJson     = JSON.stringify(questions);
 
   return `<!DOCTYPE html>
@@ -534,8 +535,8 @@ function toggleDark(){applyDark(!document.body.classList.contains('dark'));}
 function initDark(){const s=localStorage.getItem('quiz_theme');if(s==='dark')applyDark(true);else if(!s&&window.matchMedia('(prefers-color-scheme:dark)').matches)applyDark(true);}
 
 const titleEl=document.getElementById('quiz-title'),heroEl=document.getElementById('hero-title');
-titleEl.addEventListener('input',()=>{heroEl.textContent=titleEl.textContent.trim()||'${titleSafe}';document.title=titleEl.textContent.trim()||'${titleSafe}';});
-titleEl.addEventListener('blur',()=>{if(!titleEl.textContent.trim())titleEl.textContent='${titleSafe}';heroEl.textContent=titleEl.textContent.trim();document.title=titleEl.textContent.trim();});
+titleEl.addEventListener('input',()=>{heroEl.textContent=titleEl.textContent.trim()||${titleJs};document.title=titleEl.textContent.trim()||${titleJs};});
+titleEl.addEventListener('blur',()=>{if(!titleEl.textContent.trim())titleEl.textContent=${titleJs};heroEl.textContent=titleEl.textContent.trim();document.title=titleEl.textContent.trim();});
 titleEl.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();titleEl.blur();}});
 
 function saveHistory(){localStorage.setItem('quiz_history_v3',JSON.stringify(quizHistory));}
