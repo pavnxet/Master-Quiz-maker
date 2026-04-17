@@ -198,7 +198,10 @@ async function getUserStats(env, chatId) {
 //  GITHUB QUESTION STORE
 // ════════════════════════════════════════════════════════════
 function hasGithub(env) {
-  return !!((env.GITHUB_TOKEN || env.GITHUB_PERSONAL_ACCESS_TOKEN) && env.GITHUB_REPO);
+  return !!(
+    (env.GITHUB_TOKEN || env.GITHUB_PERSONAL_ACCESS_TOKEN) &&
+    env.GITHUB_REPO
+  );
 }
 
 function ghToken(env) {
@@ -249,8 +252,14 @@ async function ghFetch(env, method, filePath, body) {
 }
 
 function dedupKey(q) {
-  const en = String(q.qEnglish || "").toLowerCase().replace(/\s+/g, " ").trim();
-  const hi = String(q.qHindi || "").toLowerCase().replace(/\s+/g, " ").trim();
+  const en = String(q.qEnglish || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+  const hi = String(q.qHindi || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
   // use whichever fields are present
   if (en && hi) return `${en}|||${hi}`;
   if (en) return `en:${en}`;
@@ -283,7 +292,7 @@ async function saveQuestionsToGithub(env, questions, source) {
             sha = data.sha;
             existing = JSON.parse(fromBase64(data.content));
           }
-        } catch (_) { }
+        } catch (_) {}
 
         const seen = new Set(existing.map(dedupKey));
         const merged = [
@@ -1472,6 +1481,9 @@ footer{margin-top:20px;font-size:.75rem;color:var(--m);text-align:center}
 .qbank-dl-btn{background:var(--p);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:.7rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0}
 .qbank-dl-btn:hover{background:var(--pd)}
 .qbank-empty{font-size:.83rem;color:var(--m);text-align:center;padding:10px 0}
+.save-toggle{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:.84rem;color:var(--t);cursor:pointer;user-select:none}
+.save-toggle input[type=checkbox]{accent-color:var(--p);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+.save-toggle .nosave-hint{margin-left:auto;font-size:.72rem;color:var(--m);font-style:italic;display:none}
 </style>
 </head>
 <body>
@@ -1492,6 +1504,13 @@ footer{margin-top:20px;font-size:.75rem;color:var(--m);text-align:center}
   </div>
 
   <div class="merge-note" id="mn">✨ Multiple files will be merged into one quiz</div>
+
+  <label class="save-toggle">
+    <input type="checkbox" id="save-to-bank" checked/>
+    <span>💾 Save to Question Bank <span style="font-weight:400;color:var(--m)">(public GitHub repo)</span></span>
+    <span class="nosave-hint" id="nosave-hint">⚡ Temp mode — no GitHub sync</span>
+  </label>
+
   <div id="dbstats-wrap"></div>
   <div class="error" id="err"></div>
   <div class="spinner" id="sp">⚙️ Reading &amp; generating quiz…</div>
@@ -1658,9 +1677,19 @@ async function readJson(file){
   });
 }
 
+// Show/hide temp-mode hint when checkbox is toggled
+const saveChk=document.getElementById('save-to-bank');
+const nosaveHint=document.getElementById('nosave-hint');
+saveChk.addEventListener('change',()=>{
+  nosaveHint.style.display=saveChk.checked?'none':'inline';
+  sp.textContent=saveChk.checked?'⚙️ Reading &amp; generating quiz…':'⚡ Generating temporary quiz (no GitHub sync)…';
+});
+
 async function generate(){
   if(!selectedFiles.length)return;
   er.style.display='none';sp.style.display='block';sb.disabled=true;
+  const saveToBank=saveChk.checked;
+  sp.textContent=saveToBank?'⚙️ Reading & generating quiz…':'⚡ Generating temporary quiz (no GitHub sync)…';
   try{
     let merged=[];
     for(const f of selectedFiles){const d=await readJson(f);merged=merged.concat(d);}
@@ -1674,13 +1703,14 @@ async function generate(){
     const fd=new FormData();
     fd.append('file',blob,selectedFiles.length===1?selectedFiles[0].name:'merged.json');
     fd.append('title',title);fd.append('outname',outName);
+    fd.append('saveToGithub',saveToBank?'true':'false');
     const r=await fetch('/generate',{method:'POST',body:fd});
     if(!r.ok){const j=await r.json().catch(()=>({error:'Generation failed'}));throw new Error(j.error||'Generation failed');}
     const dlBlob=await r.blob();
     const url=URL.createObjectURL(dlBlob);
     const a=document.createElement('a');a.href=url;a.download=outName;a.click();URL.revokeObjectURL(url);
   }catch(e){er.textContent=e.message;er.style.display='block';}
-  finally{sp.style.display='none';sb.disabled=!selectedFiles.length;}
+  finally{sp.style.display='none';sp.textContent='⚙️ Reading & generating quiz…';sb.disabled=!selectedFiles.length;}
 }
 
 sb.addEventListener('click',generate);
@@ -1755,19 +1785,33 @@ async function tgGetFileUrl(token, fileId) {
   const path = res?.result?.file_path;
   return path ? `https://api.telegram.org/file/bot${token}/${path}` : null;
 }
-async function tgSendDocument(token, chatId, htmlContent, filename, caption = "") {
+async function tgSendDocument(
+  token,
+  chatId,
+  htmlContent,
+  filename,
+  caption = "",
+) {
   // FIX: Telegram captions are limited to 1024 characters
-  const safeCaption = caption.length > 1024 ? caption.slice(0, 1021) + "…" : caption;
+  const safeCaption =
+    caption.length > 1024 ? caption.slice(0, 1021) + "…" : caption;
   const form = new FormData();
   form.append("chat_id", String(chatId));
   if (safeCaption) form.append("caption", safeCaption);
   form.append("parse_mode", "HTML");
-  form.append("document", new Blob([htmlContent], { type: "text/html" }), filename);
+  form.append(
+    "document",
+    new Blob([htmlContent], { type: "text/html" }),
+    filename,
+  );
   try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, {
-      method: "POST",
-      body: form,
-    });
+    const res = await fetch(
+      `https://api.telegram.org/bot${token}/sendDocument`,
+      {
+        method: "POST",
+        body: form,
+      },
+    );
     return res.json();
   } catch (e) {
     console.error("tgSendDocument error:", e.message);
@@ -1781,6 +1825,8 @@ async function tgSendDocument(token, chatId, htmlContent, filename, caption = ""
 const WELCOME_MSG = `👋 <b>Welcome to Quiz Generator!</b>
 
 Send me a <code>.json</code> file and I'll return a fully interactive bilingual HTML quiz — and automatically save every question to the question bank.
+
+💡 <b>Tip:</b> To skip saving, add <code>#nosave</code> to your file's caption when sending it.
 
 <b>Commands:</b>
 /topics — Browse all subjects &amp; topics in the question bank
@@ -1808,7 +1854,11 @@ Send me a <code>.json</code> file and I'll return a fully interactive bilingual 
 async function handleTelegram(request, env, ctx) {
   const token = env.TELEGRAM_TOKEN;
   let update;
-  try { update = await request.json(); } catch { return okResp(); }
+  try {
+    update = await request.json();
+  } catch {
+    return okResp();
+  }
 
   const message = update.message || update.channel_post || {};
   const chatId = message?.chat?.id;
@@ -1826,43 +1876,74 @@ async function handleTelegram(request, env, ctx) {
   }
 
   if (text.startsWith("/mystats")) {
-    if (!hasDb(env)) { await tgSend(token, chatId, "⚠️ Database not configured on this server."); return okResp(); }
+    if (!hasDb(env)) {
+      await tgSend(token, chatId, "⚠️ Database not configured on this server.");
+      return okResp();
+    }
     const stats = await getUserStats(env, chatId);
     if (!stats) {
-      await tgSend(token, chatId, "📊 No stats yet — send a <code>.json</code> file to generate your first quiz!");
+      await tgSend(
+        token,
+        chatId,
+        "📊 No stats yet — send a <code>.json</code> file to generate your first quiz!",
+      );
     } else {
-      await tgSend(token, chatId,
+      await tgSend(
+        token,
+        chatId,
         `📊 <b>Your Stats</b>\n\n` +
-        `🎓 Quizzes generated: <b>${stats.totalQuizzes}</b>\n` +
-        `📅 First quiz: ${stats.firstSeen.slice(0, 10)}\n` +
-        `🕐 Last quiz:  ${stats.lastSeen.slice(0, 10)}`);
+          `🎓 Quizzes generated: <b>${stats.totalQuizzes}</b>\n` +
+          `📅 First quiz: ${stats.firstSeen.slice(0, 10)}\n` +
+          `🕐 Last quiz:  ${stats.lastSeen.slice(0, 10)}`,
+      );
     }
     return okResp();
   }
 
   if (text.startsWith("/globalstats")) {
-    if (!hasDb(env)) { await tgSend(token, chatId, "⚠️ Database not configured on this server."); return okResp(); }
+    if (!hasDb(env)) {
+      await tgSend(token, chatId, "⚠️ Database not configured on this server.");
+      return okResp();
+    }
     const stats = await getDbStats(env);
     if (!stats) {
-      await tgSend(token, chatId, "📊 No data yet — run <code>/initdb</code> first if this is a fresh deployment.");
+      await tgSend(
+        token,
+        chatId,
+        "📊 No data yet — run <code>/initdb</code> first if this is a fresh deployment.",
+      );
     } else {
-      await tgSend(token, chatId,
+      await tgSend(
+        token,
+        chatId,
         `🌍 <b>Platform Stats</b>\n\n` +
-        `🎓 Total quizzes:     <b>${stats.total}</b>\n` +
-        `📋 Questions handled: <b>${stats.totalQuestions}</b>\n` +
-        `🌐 Via Web:      ${stats.webCount}\n` +
-        `📱 Via Telegram: ${stats.tgCount}\n` +
-        `👥 Bot users:    ${stats.telegramUsers}`);
+          `🎓 Total quizzes:     <b>${stats.total}</b>\n` +
+          `📋 Questions handled: <b>${stats.totalQuestions}</b>\n` +
+          `🌐 Via Web:      ${stats.webCount}\n` +
+          `📱 Via Telegram: ${stats.tgCount}\n` +
+          `👥 Bot users:    ${stats.telegramUsers}`,
+      );
     }
     return okResp();
   }
 
   if (text.startsWith("/topics")) {
-    if (!hasGithub(env)) { await tgSend(token, chatId, "⚠️ Question bank not configured on this server."); return okResp(); }
+    if (!hasGithub(env)) {
+      await tgSend(
+        token,
+        chatId,
+        "⚠️ Question bank not configured on this server.",
+      );
+      return okResp();
+    }
     await tgSend(token, chatId, "🔍 Fetching question bank…");
     const structure = await ghListTopics(env);
     if (!structure) {
-      await tgSend(token, chatId, "📭 Question bank is empty. Send a <code>.json</code> file to start building it!");
+      await tgSend(
+        token,
+        chatId,
+        "📭 Question bank is empty. Send a <code>.json</code> file to start building it!",
+      );
       return okResp();
     }
     const subjects = Object.keys(structure).sort();
@@ -1870,7 +1951,7 @@ async function handleTelegram(request, env, ctx) {
     for (const subject of subjects) {
       const topics = structure[subject].sort();
       msg += `\n📖 <b>${escHtml(subject)}</b> (${topics.length} topic${topics.length !== 1 ? "s" : ""})\n`;
-      msg += topics.map(t => `  • ${escHtml(t)}`).join("\n") + "\n";
+      msg += topics.map((t) => `  • ${escHtml(t)}`).join("\n") + "\n";
     }
     msg += `\n💡 <i>Use /download &lt;Subject&gt; | &lt;Topic&gt; to get a quiz</i>`;
     await tgSend(token, chatId, msg);
@@ -1878,38 +1959,79 @@ async function handleTelegram(request, env, ctx) {
   }
 
   if (text.startsWith("/download")) {
-    if (!hasGithub(env)) { await tgSend(token, chatId, "⚠️ Question bank not configured on this server."); return okResp(); }
+    if (!hasGithub(env)) {
+      await tgSend(
+        token,
+        chatId,
+        "⚠️ Question bank not configured on this server.",
+      );
+      return okResp();
+    }
     const arg = text.replace(/^\/download\s*/i, "").trim();
     if (!arg) {
-      await tgSend(token, chatId,
-        "📥 Usage: <code>/download Subject | Topic</code>\n\nExample:\n<code>/download Physics | Optics</code>\n\nUse /topics to see available subjects and topics.");
+      await tgSend(
+        token,
+        chatId,
+        "📥 Usage: <code>/download Subject | Topic</code>\n\nExample:\n<code>/download Physics | Optics</code>\n\nUse /topics to see available subjects and topics.",
+      );
       return okResp();
     }
     let subject, topic;
     if (arg.includes("|")) {
-      [subject, topic] = arg.split("|").map(s => s.trim());
+      [subject, topic] = arg.split("|").map((s) => s.trim());
     } else {
       const parts = arg.split(/\s{2,}|\s*\|\s*/);
-      if (parts.length >= 2) { subject = parts[0].trim(); topic = parts.slice(1).join(" ").trim(); }
-      else { await tgSend(token, chatId, "❌ Please use the format: <code>/download Subject | Topic</code>"); return okResp(); }
+      if (parts.length >= 2) {
+        subject = parts[0].trim();
+        topic = parts.slice(1).join(" ").trim();
+      } else {
+        await tgSend(
+          token,
+          chatId,
+          "❌ Please use the format: <code>/download Subject | Topic</code>",
+        );
+        return okResp();
+      }
     }
     if (!subject || !topic) {
-      await tgSend(token, chatId, "❌ Both subject and topic are required.\nExample: <code>/download Biology | Cell Biology</code>");
+      await tgSend(
+        token,
+        chatId,
+        "❌ Both subject and topic are required.\nExample: <code>/download Biology | Cell Biology</code>",
+      );
       return okResp();
     }
-    await tgSend(token, chatId, `⚙️ Fetching <b>${escHtml(subject)} › ${escHtml(topic)}</b>…`);
+    await tgSend(
+      token,
+      chatId,
+      `⚙️ Fetching <b>${escHtml(subject)} › ${escHtml(topic)}</b>…`,
+    );
     const questions = await ghGetQuestions(env, subject, topic);
     if (!questions || !questions.length) {
-      await tgSend(token, chatId,
-        `❌ No questions found for <b>${escHtml(subject)} › ${escHtml(topic)}</b>.\n\nUse /topics to see available subjects and topics.`);
+      await tgSend(
+        token,
+        chatId,
+        `❌ No questions found for <b>${escHtml(subject)} › ${escHtml(topic)}</b>.\n\nUse /topics to see available subjects and topics.`,
+      );
       return okResp();
     }
     const title = `${subject} — ${topic}`;
     const htmlOut = generateHtml(questions, title);
     const outName = `${safeName(subject)}_${safeName(topic)}_quiz.html`;
     const caption = `✅ <b>${escHtml(title)}</b>\n📋 ${questions.length} question${questions.length !== 1 ? "s" : ""} · EN + हिं\n⭐ Flag · 🔀 Scramble · 🌙 Dark mode`;
-    const result = await tgSendDocument(token, chatId, htmlOut, outName, caption);
-    if (!result?.ok) await tgSend(token, chatId, `⚠️ Could not send file: ${escHtml(result?.description || "unknown error")}`);
+    const result = await tgSendDocument(
+      token,
+      chatId,
+      htmlOut,
+      outName,
+      caption,
+    );
+    if (!result?.ok)
+      await tgSend(
+        token,
+        chatId,
+        `⚠️ Could not send file: ${escHtml(result?.description || "unknown error")}`,
+      );
     return okResp();
   }
 
@@ -1919,45 +2041,111 @@ async function handleTelegram(request, env, ctx) {
     const filename = doc.file_name || "quiz.json";
     const ext = filename.split(".").pop().toLowerCase();
     if (!["json", "txt"].includes(ext)) {
-      await tgSend(token, chatId, "❌ Please send a <b>.json</b> or <b>.txt</b> file.");
+      await tgSend(
+        token,
+        chatId,
+        "❌ Please send a <b>.json</b> or <b>.txt</b> file.",
+      );
       return okResp();
     }
-    await tgSend(token, chatId, "⚙️ Processing your file…");
+
+    // Opt-out: caption containing #nosave or nosave (case-insensitive)
+    const caption = message.caption || "";
+    const shouldSaveToRepo = !/nosave/i.test(caption);
+
+    await tgSend(
+      token,
+      chatId,
+      shouldSaveToRepo
+        ? "⚙️ Processing your file…"
+        : "⚡ Generating temporary quiz (bypassing repository sync)…",
+    );
+
     const fileUrl = await tgGetFileUrl(token, doc.file_id);
-    if (!fileUrl) { await tgSend(token, chatId, "❌ Could not access your file. Please try again."); return okResp(); }
+    if (!fileUrl) {
+      await tgSend(
+        token,
+        chatId,
+        "❌ Could not access your file. Please try again.",
+      );
+      return okResp();
+    }
     let content;
     try {
       const fileResp = await fetch(fileUrl);
       if (!fileResp.ok) throw new Error(`HTTP ${fileResp.status}`);
       content = await fileResp.text();
     } catch (e) {
-      await tgSend(token, chatId, `❌ Failed to download the file: ${escHtml(e.message)}`);
+      await tgSend(
+        token,
+        chatId,
+        `❌ Failed to download the file: ${escHtml(e.message)}`,
+      );
       return okResp();
     }
     let questions;
-    try { questions = JSON.parse(content); } catch (e) {
-      await tgSend(token, chatId, `❌ Invalid JSON: ${escHtml(e.message)}`); return okResp();
-    }
-    if (!Array.isArray(questions) || !questions.length) {
-      await tgSend(token, chatId, "❌ JSON must be a non-empty array of question objects.");
+    try {
+      questions = JSON.parse(content);
+    } catch (e) {
+      await tgSend(token, chatId, `❌ Invalid JSON: ${escHtml(e.message)}`);
       return okResp();
     }
-    const title = filename.replace(/\.\w+$/, "").replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    if (!Array.isArray(questions) || !questions.length) {
+      await tgSend(
+        token,
+        chatId,
+        "❌ JSON must be a non-empty array of question objects.",
+      );
+      return okResp();
+    }
+    const title = filename
+      .replace(/\.\w+$/, "")
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
     const htmlOut = generateHtml(questions, title);
     const outName = filename.replace(/\.\w+$/, "") + "_quiz.html";
-    const caption = `✅ <b>${escHtml(title)}</b>\n📋 ${questions.length} questions · EN + हिं\n⭐ Flag · ⌨️ Shortcuts · 🔀 Scramble · 🌙 Dark mode`;
-    const result = await tgSendDocument(token, chatId, htmlOut, outName, caption);
-    if (!result?.ok) await tgSend(token, chatId, `⚠️ Could not send file: ${escHtml(result?.description || "unknown error")}`);
+    const saveNote = shouldSaveToRepo
+      ? "\n💾 Saved to Question Bank"
+      : "\n⚡ Temporary (not saved to bank)";
+    const docCaption = `✅ <b>${escHtml(title)}</b>\n📋 ${questions.length} questions · EN + हिं\n⭐ Flag · ⌨️ Shortcuts · 🔀 Scramble · 🌙 Dark mode${saveNote}`;
+    const result = await tgSendDocument(
+      token,
+      chatId,
+      htmlOut,
+      outName,
+      docCaption,
+    );
+    if (!result?.ok)
+      await tgSend(
+        token,
+        chatId,
+        `⚠️ Could not send file: ${escHtml(result?.description || "unknown error")}`,
+      );
     ctx.waitUntil(
       Promise.all([
-        trackGeneration(env, { source: "telegram", title, questionsCount: questions.length, chatId, username, firstName }),
-        saveQuestionsToGithub(env, questions, "telegram"),
-      ])
+        // Always track for analytics
+        trackGeneration(env, {
+          source: "telegram",
+          title,
+          questionsCount: questions.length,
+          chatId,
+          username,
+          firstName,
+        }),
+        // Only save to GitHub when user has not opted out
+        ...(shouldSaveToRepo
+          ? [saveQuestionsToGithub(env, questions, "telegram")]
+          : []),
+      ]),
     );
     return okResp();
   }
 
-  await tgSend(token, chatId, "📄 Send a <b>.json</b> quiz file, or type /help for instructions.");
+  await tgSend(
+    token,
+    chatId,
+    "📄 Send a <b>.json</b> quiz file, or type /help for instructions.",
+  );
   return okResp();
 }
 
@@ -1990,7 +2178,9 @@ async function setupWebhook(request, env) {
 // ════════════════════════════════════════════════════════════
 async function handleGenerate(request, env, ctx) {
   let formData;
-  try { formData = await request.formData(); } catch {
+  try {
+    formData = await request.formData();
+  } catch {
     return jsonResponse({ error: "Could not parse form data." }, 400);
   }
   const file = formData.get("file");
@@ -1998,25 +2188,45 @@ async function handleGenerate(request, env, ctx) {
 
   const content = await file.text();
   const filename = formData.get("outname") || file.name || "quiz.json";
-  const title = formData.get("title") ||
-    filename.replace(/\.\w+$/, "").replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  const title =
+    formData.get("title") ||
+    filename
+      .replace(/\.\w+$/, "")
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
 
   let questions;
-  try { questions = JSON.parse(content); } catch (e) {
+  try {
+    questions = JSON.parse(content);
+  } catch (e) {
     return jsonResponse({ error: `Invalid JSON: ${e.message}` }, 400);
   }
   if (!Array.isArray(questions) || !questions.length)
     return jsonResponse({ error: "JSON must be a non-empty array." }, 400);
 
+  // Parse opt-out flag — FormData sends strings; anything other than the
+  // explicit string "false" keeps saving enabled (default-on behaviour).
+  const shouldSaveToRepo = (formData.get("saveToGithub") ?? "true") !== "false";
+
   const htmlOut = generateHtml(questions, title);
-  const safeFilename = filename.endsWith(".html") ? filename : filename.replace(/\.\w+$/, "") + "_quiz.html";
+  const safeFilename = filename.endsWith(".html")
+    ? filename
+    : filename.replace(/\.\w+$/, "") + "_quiz.html";
   const encodedFilename = encodeURIComponent(safeFilename).replace(/'/g, "%27");
 
   ctx.waitUntil(
     Promise.all([
-      trackGeneration(env, { source: "web", title, questionsCount: questions.length }),
-      saveQuestionsToGithub(env, questions, "web"),
-    ])
+      // Always track generation for analytics
+      trackGeneration(env, {
+        source: "web",
+        title,
+        questionsCount: questions.length,
+      }),
+      // Only save to GitHub if the user chose to
+      ...(shouldSaveToRepo
+        ? [saveQuestionsToGithub(env, questions, "web")]
+        : []),
+    ]),
   );
 
   return new Response(htmlOut, {
@@ -2032,9 +2242,11 @@ async function handleGenerate(request, env, ctx) {
 // ════════════════════════════════════════════════════════════
 async function handleDbStats(env) {
   // FIX: return 503 when DB is not configured or has no data yet
-  if (!hasDb(env)) return jsonResponse({ error: "Database not configured." }, 503);
+  if (!hasDb(env))
+    return jsonResponse({ error: "Database not configured." }, 503);
   const stats = await getDbStats(env);
-  if (!stats) return jsonResponse({ error: "No data yet — run /initdb first." }, 503);
+  if (!stats)
+    return jsonResponse({ error: "No data yet — run /initdb first." }, 503);
   return jsonResponse(stats);
 }
 
@@ -2042,11 +2254,16 @@ async function handleDbStats(env) {
 //  WEB: GET /api/browse
 // ════════════════════════════════════════════════════════════
 async function handleApiBrowse(env) {
-  if (!hasGithub(env)) return jsonResponse({ error: "Question bank not configured." }, 503);
+  if (!hasGithub(env))
+    return jsonResponse({ error: "Question bank not configured." }, 503);
   const structure = await ghListTopics(env);
-  if (!structure) return jsonResponse({ structure: {}, subjects: 0, totalTopics: 0 });
+  if (!structure)
+    return jsonResponse({ structure: {}, subjects: 0, totalTopics: 0 });
   const subjects = Object.keys(structure).length;
-  const totalTopics = Object.values(structure).reduce((a, t) => a + t.length, 0);
+  const totalTopics = Object.values(structure).reduce(
+    (a, t) => a + t.length,
+    0,
+  );
   return jsonResponse({ structure, subjects, totalTopics });
 }
 
@@ -2054,15 +2271,22 @@ async function handleApiBrowse(env) {
 //  WEB: GET /api/download?subject=X&topic=Y
 // ════════════════════════════════════════════════════════════
 async function handleApiDownload(request, env) {
-  if (!hasGithub(env)) return jsonResponse({ error: "Question bank not configured." }, 503);
+  if (!hasGithub(env))
+    return jsonResponse({ error: "Question bank not configured." }, 503);
   const url = new URL(request.url);
   const subject = (url.searchParams.get("subject") || "").trim();
   const topic = (url.searchParams.get("topic") || "").trim();
   if (!subject || !topic)
-    return jsonResponse({ error: "subject and topic query params are required." }, 400);
+    return jsonResponse(
+      { error: "subject and topic query params are required." },
+      400,
+    );
   const questions = await ghGetQuestions(env, subject, topic);
   if (!questions || !questions.length)
-    return jsonResponse({ error: `No questions found for "${subject} › ${topic}".` }, 404);
+    return jsonResponse(
+      { error: `No questions found for "${subject} › ${topic}".` },
+      404,
+    );
   const title = `${subject} — ${topic}`;
   const htmlOut = generateHtml(questions, title);
   const filename = `${safeName(subject)}_${safeName(topic)}_quiz.html`;
@@ -2098,21 +2322,34 @@ export default {
       return env.TELEGRAM_TOKEN ? handleTelegram(request, env, ctx) : okResp();
 
     if (method === "GET" && path === "/setup")
-      return env.TELEGRAM_TOKEN ? setupWebhook(request, env) : jsonResponse({ error: "TELEGRAM_TOKEN not set." }, 400);
+      return env.TELEGRAM_TOKEN
+        ? setupWebhook(request, env)
+        : jsonResponse({ error: "TELEGRAM_TOKEN not set." }, 400);
 
     if (method === "GET" && path === "/initdb") {
-      if (!hasDb(env)) return jsonResponse({ error: "TURSO_DB_URL and TURSO_AUTH_TOKEN not set." }, 400);
+      if (!hasDb(env))
+        return jsonResponse(
+          { error: "TURSO_DB_URL and TURSO_AUTH_TOKEN not set." },
+          400,
+        );
       await initDb(env);
-      return jsonResponse({ ok: true, message: "Tables created (or already exist)." });
+      return jsonResponse({
+        ok: true,
+        message: "Tables created (or already exist).",
+      });
     }
 
-    if (method === "POST" && path === "/generate") return handleGenerate(request, env, ctx);
+    if (method === "POST" && path === "/generate")
+      return handleGenerate(request, env, ctx);
     if (method === "GET" && path === "/dbstats") return handleDbStats(env);
     if (method === "GET" && path === "/api/browse") return handleApiBrowse(env);
-    if (method === "GET" && path === "/api/download") return handleApiDownload(request, env);
+    if (method === "GET" && path === "/api/download")
+      return handleApiDownload(request, env);
 
     if (method === "GET" && path === "/")
-      return new Response(UPLOAD_PAGE, { headers: { "Content-Type": "text/html; charset=UTF-8" } });
+      return new Response(UPLOAD_PAGE, {
+        headers: { "Content-Type": "text/html; charset=UTF-8" },
+      });
 
     return new Response("Not found", { status: 404 });
   },
