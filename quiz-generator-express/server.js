@@ -436,3 +436,117 @@ async function handleTelegramUpdate(update) {
       githubStructure = await ghListTopics();
     }
 
+    // Generate quiz HTML and attempt to save to GitHub
+    await setStatus("🎨 Generating HTML quiz… [▓▓▓░░░░] 60%");
+    const title = filename.replace(/\.(json|txt)$/i, "");
+    const htmlOut = generateHtml(questions, title);
+    const outName = `${safeName(title)}_quiz.html`;
+
+    if (shouldSaveToRepo && hasGithub()) {
+      await setStatus("☁️ Saving to GitHub… [▓▓▓▓▓░░] 80%");
+      const saveSuccess = await saveQuestionsToGithub(
+        questions,
+        githubStructure,
+        filename,
+        caption
+      );
+      if (!saveSuccess) {
+        await setStatus("⚠️ GitHub save failed, but quiz was generated.");
+      }
+    }
+
+    await setStatus("✅ Quiz generated and processed!");
+    fireAndForget(trackGeneration(chatId, filename, questions.length, "document"));
+    const result = await tgSendDocument(chatId, htmlOut, outName, `✅ Quiz ready\n📋 ${questions.length} questions`);
+    if (!result?.ok) {
+      await tgSend(chatId, `⚠️ Could not send file: ${escHtml(result?.description || "unknown error")}`);
+    }
+    return;
+  }
+}
+
+app.post("/webhook", express.json(), async (req, res) => {
+  try {
+    if (req.body?.update_id) {
+      fireAndForget(handleTelegramUpdate(req.body));
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("webhook error:", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+app.get("/", (req, res) => {
+  if (!isAdminAuthorized(req)) {
+    return res.status(401).send("Unauthorized");
+  }
+  res.set("Content-Type", "text/html");
+  res.send(UPLOAD_PAGE);
+});
+
+app.get("/stats", (req, res) => {
+  if (!isAdminAuthorized(req)) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  res.json(getDbStats());
+});
+
+app.post("/upload", (req, res) => {
+  if (!isAdminAuthorized(req)) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  
+  const upload = multer({ storage: multer.memoryStorage() });
+  upload.single("file")(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    
+    try {
+      const content = req.file.buffer.toString("utf-8");
+      const questions = JSON.parse(content);
+      
+      if (!Array.isArray(questions)) {
+        return res.status(400).json({ error: "JSON must be an array of questions" });
+      }
+      
+      const validated = validateQuestions(questions);
+      if (!validated.length) {
+        return res.status(400).json({ error: "No valid questions found" });
+      }
+      
+      fireAndForget(trackGeneration(null, req.file.originalname, validated.length, "web"));
+      
+      const title = req.file.originalname.replace(/\.[^/.]+$/, "");
+      const htmlOut = generateHtml(validated, title);
+      
+      res.set("Content-Type", "text/html");
+      res.set("Content-Disposition", `attachment; filename="${safeName(title)}_quiz.html"`);
+      res.send(htmlOut);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+});
+
+// ── Initialize & Start Server ───────────────────────────────────────────────
+(async () => {
+  try {
+    await initDb();
+    console.log("✓ Database initialized");
+  } catch (err) {
+    console.error("✗ Database init failed:", err.message);
+    process.exit(1);
+  }
+
+  app.listen(PORT, () => {
+    console.log(`✓ Server running on port ${PORT}`);
+  });
+})();
+
+export default app;
