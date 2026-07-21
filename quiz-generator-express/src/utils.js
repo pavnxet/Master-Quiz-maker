@@ -18,7 +18,9 @@ export function fromBase64(b64) {
 export function safeName(s) {
   return (
     String(s || "General")
-      .replace(/[/\\:*?"<>|#%]/g, "")
+      .replace(/[/\:*?"<>|#%]/g, "")
+      .replace(/\s*->\s*/g, " ")
+      .replace(/\s+/g, " ")
       .trim() || "General"
   );
 }
