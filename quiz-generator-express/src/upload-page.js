@@ -275,23 +275,16 @@ saveChk.addEventListener('change',()=>{
 });
 
 // Progress bar controller
-// [M3] Pass saveToBank so AI stage is hidden when save is disabled
-function startProgress(saveToBank){
+function startProgress(){
   const wrap=document.getElementById('prog-wrap'),bar=document.getElementById('prog-bar'),
     lbl=document.getElementById('prog-label'),pct=document.getElementById('prog-pct'),
     stg=document.getElementById('prog-stage');
-  // AI + bank stages only shown when save is on
-  const ALL_STAGES=[
-    {p:15,l:'Reading file…',s:'⏳ Parsing questions'},
-    {p:35,l:'Checking question bank…',s:'🔍 Fetching GitHub taxonomy',bankOnly:true},
-    {p:62,l:'AI normalizing topics…',s:'🤖 Talking to gpt-oss-120b',bankOnly:true},
-    {p:82,l:'Building quiz…',s:'⚙️ Applying topic mapping'},
-    {p:95,l:'Almost there…',s:'📦 Generating HTML'},
+  const STAGES=[
+    {p:15,l:'Reading file...',s:'... Parsing questions'},
+    {p:55,l:'Building quiz...',s:'... Generating HTML'},
+    {p:90,l:'Almost there...',s:'... Packaging for download'},
   ];
-  const STAGES=ALL_STAGES.filter(s=>!s.bankOnly||saveToBank);
-  // Re-distribute percentages evenly when stages are skipped
-  const n=STAGES.length;
-  STAGES.forEach((s,i)=>{s.p=Math.round(15+(80/(n-1))*i)||(15+80);});
+  STAGES.forEach((s,i)=>{s.p=Math.round(15+(80/(STAGES.length-1))*i)||(15+80);});
   STAGES[STAGES.length-1].p=95;
   wrap.style.display='block';bar.style.background='';
   let i=0;
@@ -318,7 +311,7 @@ async function generate(){
   if(!selectedFiles.length)return;
   er.style.display='none';sb.disabled=true;
   const saveToBank=saveChk.checked;
-  const prog=startProgress(saveToBank); // [M3] pass flag so AI stage shows/hides
+  const prog=startProgress();
   try{
     let merged=[];
     for(const f of selectedFiles){const d=await readJson(f);merged=merged.concat(d);}

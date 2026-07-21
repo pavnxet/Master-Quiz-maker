@@ -8,7 +8,6 @@ import { initDb, trackGeneration, getDbStats }  from "./src/db.js";
 import {
   hasGithub, ghListTopics, ghGetQuestions, saveQuestionsToGithub,
 } from "./src/github.js";
-import { hasOpenRouter, normalizeQuestions } from "./src/ai.js";
 import {
   tgApi, tgSend, tgSendDocument, tgGetFileUrl, editStatus,
 } from "./src/telegram.js";
@@ -178,13 +177,7 @@ app.post("/generate", upload.single("file"), async (req, res) => {
 
   const shouldSave = (req.body.saveToGithub ?? "true") !== "false";
 
-  let normalizedQuestions = questions;
-  if (shouldSave && hasGithub()) {
-    const structure = await ghListTopics();
-    normalizedQuestions = await normalizeQuestions(questions, structure);
-  }
-
-  const htmlOut = generateHtml(normalizedQuestions, title);
+  const htmlOut = generateHtml(questions, title);
   const outName = filename.replace(/\.\w+$/, "") + "_quiz.html";
 
   res.set("Content-Type", "text/html; charset=UTF-8");
@@ -443,49 +436,3 @@ async function handleTelegramUpdate(update) {
       githubStructure = await ghListTopics();
     }
 
-    if (shouldSaveToRepo && githubStructure) {
-      await setStatus("🤖 AI normalizing topics… [▓▓▓░░] 60%");
-      questions = await normalizeQuestions(questions, githubStructure);
-    }
-
-    await setStatus("⚙️ Building quiz… [▓▓▓▓░] 80%");
-    const title   = filename
-      .replace(/\.\w+$/, "")
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
-    const htmlOut = generateHtml(questions, title);
-    const outName = filename.replace(/\.\w+$/, "") + "_quiz.html";
-    const saveNote = shouldSaveToRepo ? "\n💾 Saved to Question Bank" : "\n⚡ Temporary (not saved)";
-    const docCaption = `✅ <b>${escHtml(title)}</b>\n📋 ${questions.length} questions · EN + हिं\n⭐ Flag · ⌨️ Shortcuts · 🔀 Scramble · 🌙 Dark mode${saveNote}`;
-
-    const result = await tgSendDocument(chatId, htmlOut, outName, docCaption);
-    if (result?.ok) {
-      await setStatus("✅ Done! Quiz delivered. [▓▓▓▓▓] 100%");
-    } else {
-      await setStatus(`❌ Quiz built but delivery failed: ${escHtml(result?.description || "unknown error")}`);
-    }
-
-    // Fire and forget: analytics + GitHub save
-    fireAndForget(Promise.all([
-      trackGeneration({ source: "telegram", title, questionsCount: questions.length, chatId, username, firstName }),
-      ...(shouldSaveToRepo ? [saveQuestionsToGithub(questions, "telegram")] : []),
-    ]));
-    return;
-  }
-
-  // Default
-  await tgSend(chatId,
-    "📄 Send a <b>.json</b> quiz file, or type /help for instructions."
-  );
-}
-
-// ─── Start server ─────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`✅ Quiz Generator running at http://localhost:${PORT}`);
-  console.log(`   GitHub bank : ${process.env.GITHUB_REPO    || "⚠️  not configured"}`);
-  console.log(`   Turso DB    : ${process.env.TURSO_DB_URL   ? "✅ configured" : "⚠️  not configured"}`);
-  console.log(`   OpenRouter  : ${process.env.OPENROUTER_API_KEY ? "✅ configured" : "⚠️  not configured"}`);
-  console.log(`   Telegram    : ${process.env.TELEGRAM_TOKEN  ? "✅ configured" : "⚠️  not configured"}`);
-});
-
-export default app;
